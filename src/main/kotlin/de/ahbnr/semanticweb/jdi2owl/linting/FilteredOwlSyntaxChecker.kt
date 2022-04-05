@@ -1,7 +1,7 @@
 package de.ahbnr.semanticweb.jdi2owl.linting
 
 import com.github.owlcs.ontapi.jena.model.OntObject
-import de.ahbnr.semanticweb.logging.Logger
+import de.ahbnr.semanticweb.jdi2owl.Logger
 import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
 import openllet.pellint.rdfxml.OWLEntityDatabase
 import openllet.pellint.rdfxml.OWLSyntaxChecker

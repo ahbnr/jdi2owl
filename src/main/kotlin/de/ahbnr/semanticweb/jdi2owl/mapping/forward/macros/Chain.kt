@@ -1,6 +1,6 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.macros
 
-import de.ahbnr.semanticweb.logging.Logger
+import de.ahbnr.semanticweb.jdi2owl.Logger
 import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.Property

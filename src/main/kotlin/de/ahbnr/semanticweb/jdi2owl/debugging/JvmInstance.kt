@@ -9,7 +9,7 @@ import com.sun.jdi.VirtualMachine
 import com.sun.jdi.event.BreakpointEvent
 import com.sun.jdi.event.EventSet
 import com.sun.jdi.event.VMDisconnectEvent
-import de.ahbnr.semanticweb.logging.Logger
+import de.ahbnr.semanticweb.jdi2owl.Logger
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.io.Closeable

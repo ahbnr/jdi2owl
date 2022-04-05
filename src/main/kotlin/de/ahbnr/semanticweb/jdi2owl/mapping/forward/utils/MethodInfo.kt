@@ -5,7 +5,7 @@ import com.sun.jdi.LocalVariable
 import com.sun.jdi.Method
 import de.ahbnr.semanticweb.jdi2owl.debugging.utils.InternalJDIUtils
 import de.ahbnr.semanticweb.jdi2owl.debugging.utils.getLocalMethodId
-import de.ahbnr.semanticweb.logging.Logger
+import de.ahbnr.semanticweb.jdi2owl.Logger
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.BuildParameters
 import org.apache.commons.collections4.MultiValuedMap
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap

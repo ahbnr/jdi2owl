@@ -1,7 +1,7 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils
 
 import com.github.owlcs.ontapi.OntManagers
-import de.ahbnr.semanticweb.logging.Logger
+import de.ahbnr.semanticweb.jdi2owl.Logger
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.ParserException
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.ModelFactory

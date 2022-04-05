@@ -1,7 +1,7 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers
 
 import com.sun.jdi.*
-import de.ahbnr.semanticweb.logging.Logger
+import de.ahbnr.semanticweb.jdi2owl.Logger
 import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
 import de.ahbnr.semanticweb.jdi2owl.mapping.datatypes.JavaAccessModifierDatatype
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.BuildParameters

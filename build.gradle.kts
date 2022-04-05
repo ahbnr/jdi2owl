@@ -18,9 +18,6 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
-    // local copy of custom logging interface
-    implementation("de.ahbnr.semanticweb.logging:logging-1.0-SNAPSHOT")
-
     // Apache Jena
     implementation("org.apache.jena:apache-jena-libs:4.2.0")
 

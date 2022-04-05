@@ -3,7 +3,7 @@ package de.ahbnr.semanticweb.jdi2owl.debugging
 import com.sun.jdi.*
 import de.ahbnr.semanticweb.jdi2owl.debugging.mirrors.IterableMirror
 import de.ahbnr.semanticweb.jdi2owl.debugging.mirrors.utils.MirroringError
-import de.ahbnr.semanticweb.logging.Logger
+import de.ahbnr.semanticweb.jdi2owl.Logger
 import de.ahbnr.semanticweb.jdi2owl.mapping.MappingLimiter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

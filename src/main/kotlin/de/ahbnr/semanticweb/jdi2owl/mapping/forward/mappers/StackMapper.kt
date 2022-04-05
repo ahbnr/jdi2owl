@@ -5,7 +5,7 @@ package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers
 import com.sun.jdi.AbsentInformationException
 import com.sun.jdi.StackFrame
 import com.sun.jdi.Value
-import de.ahbnr.semanticweb.logging.Logger
+import de.ahbnr.semanticweb.jdi2owl.Logger
 import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.BuildParameters
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.IMapper

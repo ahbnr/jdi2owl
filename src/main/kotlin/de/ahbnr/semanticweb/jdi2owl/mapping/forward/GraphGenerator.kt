@@ -9,7 +9,7 @@ import de.ahbnr.semanticweb.jdi2owl.linting.ModelSanityChecker
 import de.ahbnr.semanticweb.jdi2owl.mapping.Namespaces
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.macros.Chain
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.UniversalKnowledgeBaseParser
-import de.ahbnr.semanticweb.logging.Logger
+import de.ahbnr.semanticweb.jdi2owl.Logger
 import org.apache.jena.rdf.model.Model
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

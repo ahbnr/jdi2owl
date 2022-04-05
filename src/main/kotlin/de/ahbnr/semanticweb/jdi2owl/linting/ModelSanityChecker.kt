@@ -2,7 +2,7 @@ package de.ahbnr.semanticweb.jdi2owl.linting
 
 import com.github.owlcs.ontapi.Ontology
 import de.ahbnr.semanticweb.jdi2owl.mapping.MappingLimiter
-import de.ahbnr.semanticweb.logging.Logger
+import de.ahbnr.semanticweb.jdi2owl.Logger
 import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
 import openllet.core.vocabulary.BuiltinNamespace
 import openllet.jena.BuiltinTerm
