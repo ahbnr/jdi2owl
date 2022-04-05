@@ -2,7 +2,19 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     // id("com.github.johnrengelman.shadow") version "7.1.0"
-    kotlin("jvm")
+
+    // Dirty hack to make this project work as a standalone library as well as a sub-project of the sjdb
+    // multi-project build
+    // The problem is, that multi-project builds do not allow multiple plugin version
+    // specifications. Hence, we turn off the version specification, if there is a root
+    // project file above this directory.
+    if (File("../settings.gradle.kts").exists()) {
+        kotlin("jvm")
+    }
+
+    else {
+        kotlin("jvm") version "1.5.31"
+    }
 }
 
 group = "de.ahbnr.semanticweb"
