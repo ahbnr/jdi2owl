@@ -254,7 +254,8 @@ class ObjectMapper : IMapper {
                             typedSequenceElementURI
                         )
 
-                        val referenceURI = URIs.prog.genReferenceTypeURI(componentType)
+                        val componentTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(componentType)
+                        val referenceURI = URIs.prog.genReferenceTypeURI(componentTypeInfo)
                         tripleCollector.addStatement(
                             typedStoresReferenceURI,
                             URIs.rdfs.range,
@@ -686,11 +687,12 @@ class ObjectMapper : IMapper {
                     )
                 )
 
+                val referenceTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(referenceType)
                 // it is of a particular java class
                 tripleCollector.addStatement(
                     objectURI,
                     URIs.rdf.type,
-                    URIs.prog.genReferenceTypeURI(referenceType)
+                    URIs.prog.genReferenceTypeURI(referenceTypeInfo)
                 )
 
                 when (objectReference) {
@@ -716,10 +718,12 @@ class ObjectMapper : IMapper {
                     if (!classType.isPrepared)
                         continue // skip those class types which have not been fully prepared in the vm state yet
 
+                    val classTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(classType)
+
                     val fieldValues = classType.getValues(classType.fields().filter { it.isStatic })
 
                     for ((field, value) in fieldValues) {
-                        addField(field, value, URIs.prog.genReferenceTypeURI(classType))
+                        addField(field, value, URIs.prog.genReferenceTypeURI(classTypeInfo))
                     }
                 }
             }
@@ -732,7 +736,8 @@ class ObjectMapper : IMapper {
                 // Should we close all Java reference type?
                 if (buildParameters.limiter.settings.closeReferenceTypes) {
                     for (referenceType in buildParameters.jvmState.pausedThread.virtualMachine().allClasses()) {
-                        val typeIri = URIs.prog.genReferenceTypeURI(referenceType)
+                        val referenceTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(referenceType)
+                        val typeIri = URIs.prog.genReferenceTypeURI(referenceTypeInfo)
                         // val instances = referenceType.instances(Long.MAX_VALUE)
                         val instanceIris = allObjects
                             .filter { it.referenceType() == referenceType }

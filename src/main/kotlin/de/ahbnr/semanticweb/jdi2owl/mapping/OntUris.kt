@@ -2,6 +2,7 @@ package de.ahbnr.semanticweb.jdi2owl.mapping
 
 import com.sun.jdi.*
 import de.ahbnr.semanticweb.jdi2owl.debugging.utils.getFullyQualifiedName
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.LocalVariableInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.LocationInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.MethodInfo
@@ -144,8 +145,8 @@ class OntURIs(val ns: Namespaces) {
         fun genMethodURI(methodInfo: MethodInfo): String =
             "${ns.prog}${IRILib.encodeUriComponent(getFullyQualifiedName(methodInfo.jdiMethod))}"
 
-        fun genReferenceTypeURI(referenceType: ReferenceType): String {
-            return "${ns.prog}${IRILib.encodeUriComponent(referenceType.name())}"
+        fun genReferenceTypeURI(referenceTypeInfo: TypeInfo.ReferenceTypeInfo): String {
+            return "${ns.prog}${IRILib.encodeUriComponent(referenceTypeInfo.rcn)}"
         }
 
         fun genFieldURI(field: Field): String =
@@ -154,10 +155,6 @@ class OntURIs(val ns: Namespaces) {
                     getFullyQualifiedName(field)
                 )
             }"
-
-        fun genUnloadedTypeURI(typeName: String): String {
-            return ns.prog + IRILib.encodeUriComponent(typeName)
-        }
 
         fun genLocationURI(locationInfo: LocationInfo): String =
             "${ns.prog}location_${IRILib.encodeUriComponent(locationInfo.id)}"

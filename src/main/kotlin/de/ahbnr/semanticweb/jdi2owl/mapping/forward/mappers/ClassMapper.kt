@@ -47,11 +47,12 @@ class ClassMapper : IMapper {
                 if (buildParameters.limiter.canReferenceTypeBeSkipped(typeName))
                     return
 
-                val subject = URIs.prog.genUnloadedTypeURI(typeName)
+                val typeInfo = buildParameters.typeInfoProvider.getNotYetLoadedTypeInfo(typeName)
+                val subjectURI = URIs.prog.genReferenceTypeURI(typeInfo)
 
                 // TODO: Check if we already added a triple for this unloaded type
                 tripleCollector.addStatement(
-                    subject,
+                    subjectURI,
                     URIs.rdf.type,
                     URIs.java.UnloadedType
                 )
@@ -59,7 +60,7 @@ class ClassMapper : IMapper {
                 // it is also an owl class
                 // TODO: Why? Check model
                 tripleCollector.addStatement(
-                    subject,
+                    subjectURI,
                     URIs.rdf.type,
                     URIs.owl.Class
                 )
@@ -67,7 +68,7 @@ class ClassMapper : IMapper {
                 // all unloaded types must be reference types
                 // and thus inherit from java.lang.Object
                 tripleCollector.addStatement(
-                    subject,
+                    subjectURI,
                     URIs.rdfs.subClassOf,
                     URIs.prog.java_lang_Object
                 )
@@ -98,10 +99,10 @@ class ClassMapper : IMapper {
 
                 // Now we need to clarify the type of the field
                 val fieldType = try {
-                    JavaType.LoadedType(field.type())
-                } catch (e: ClassNotLoadedException) {
-                    JavaType.UnloadedType(field.typeName())
-                }
+                        JavaType.LoadedType(field.type())
+                    } catch (e: ClassNotLoadedException) {
+                        JavaType.UnloadedType(field.typeName())
+                    }
 
                 // Fields are modeled as properties.
                 // This way, the field type can be encoded in the property range.
@@ -122,10 +123,11 @@ class ClassMapper : IMapper {
 
                             // We now restrict the kind of values the field property can link to, that is, we
                             // set the rdfs:range to the field type
+                            val fieldTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(fieldType.type)
                             tripleCollector.addStatement(
                                 fieldURI,
                                 URIs.rdfs.range,
-                                addReferenceOrNullClass(URIs.prog.genReferenceTypeURI(fieldType.type))
+                                addReferenceOrNullClass(URIs.prog.genReferenceTypeURI(fieldTypeInfo))
                             )
 
                             if (!field.isStatic) {
@@ -195,10 +197,11 @@ class ClassMapper : IMapper {
                             URIs.owl.ObjectProperty
                         )
 
+                        val notYetLoadedTypeInfo = buildParameters.typeInfoProvider.getNotYetLoadedTypeInfo(fieldType.typeName)
                         tripleCollector.addStatement(
                             fieldURI,
                             URIs.rdfs.range,
-                            URIs.prog.genUnloadedTypeURI(fieldType.typeName)
+                            URIs.prog.genReferenceTypeURI(notYetLoadedTypeInfo)
                         )
                     }
                 }
@@ -283,10 +286,10 @@ class ClassMapper : IMapper {
 
                 // Lets clarify the type of the variable and deal with unloaded types
                 val variableType = try {
-                    JavaType.LoadedType(variable.jdiLocalVariable.type())
-                } catch (e: ClassNotLoadedException) {
-                    JavaType.UnloadedType(variable.jdiLocalVariable.typeName())
-                }
+                        JavaType.LoadedType(variable.jdiLocalVariable.type())
+                    } catch (e: ClassNotLoadedException) {
+                        JavaType.UnloadedType(variable.jdiLocalVariable.typeName())
+                    }
 
                 // A variable declaration is modeled as a property that relates StackFrames and the variable values.
                 // This allows to encode the typing of the variable into the property range.
@@ -305,10 +308,11 @@ class ClassMapper : IMapper {
 
                                 // ...and the variable property ranges over the reference type of the variable
                                 // and the null value:
+                                val variableTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(variableType.type)
                                 tripleCollector.addStatement(
                                     variableDeclarationURI,
                                     URIs.rdfs.range,
-                                    addReferenceOrNullClass(URIs.prog.genReferenceTypeURI(variableType.type))
+                                    addReferenceOrNullClass(URIs.prog.genReferenceTypeURI(variableTypeInfo))
                                 )
                             }
                             is PrimitiveType -> {
@@ -342,10 +346,11 @@ class ClassMapper : IMapper {
                             URIs.owl.ObjectProperty
                         )
 
+                        val notYetLoadedTypeInfo = buildParameters.typeInfoProvider.getNotYetLoadedTypeInfo(variableType.typeName)
                         tripleCollector.addStatement(
                             variableDeclarationURI,
                             URIs.rdfs.range,
-                            URIs.prog.genUnloadedTypeURI(variableType.typeName)
+                            URIs.prog.genReferenceTypeURI(notYetLoadedTypeInfo)
                         )
                     }
                 }
@@ -498,7 +503,8 @@ class ClassMapper : IMapper {
                 if (buildParameters.limiter.canReferenceTypeBeSkipped(classType))
                     return
 
-                val classSubject = URIs.prog.genReferenceTypeURI(classType)
+                val classTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(classType)
+                val classSubject = URIs.prog.genReferenceTypeURI(classTypeInfo)
 
                 // classSubject is an owl class
                 // FIXME: Shouldnt this be implied by being a subClassOf java.lang.Object?
@@ -525,10 +531,12 @@ class ClassMapper : IMapper {
                 // (btw. prog:java.lang.Object is defined as an OWL class in the base ontology)
                 val superClass: ClassType? = classType.superclass()
                 if (superClass != null && !buildParameters.limiter.canReferenceTypeBeSkipped(superClass)) {
+                    val superClassInfo = buildParameters.typeInfoProvider.getTypeInfo(superClass)
+
                     tripleCollector.addStatement(
                         classSubject,
                         URIs.rdfs.subClassOf,
-                        URIs.prog.genReferenceTypeURI(superClass)
+                        URIs.prog.genReferenceTypeURI(superClassInfo)
                     )
                 } else if (classType.name() != "java.lang.Object") {
                     tripleCollector.addStatement(
@@ -542,10 +550,12 @@ class ClassMapper : IMapper {
                 val superInterfaces =
                     classType.interfaces().filterNot { buildParameters.limiter.canReferenceTypeBeSkipped(it) }
                 for (superInterface in superInterfaces) {
+                    val superInterfaceInfo = buildParameters.typeInfoProvider.getTypeInfo(superInterface)
+
                     tripleCollector.addStatement(
                         classSubject,
                         URIs.rdfs.subClassOf,
-                        URIs.prog.genReferenceTypeURI(superInterface)
+                        URIs.prog.genReferenceTypeURI(superInterfaceInfo)
                     )
                 }
 
@@ -576,7 +586,8 @@ class ClassMapper : IMapper {
                     return
                 }
 
-                val arrayTypeURI = URIs.prog.genReferenceTypeURI(arrayType)
+                val arrayTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(arrayType)
+                val arrayTypeURI = URIs.prog.genReferenceTypeURI(arrayTypeInfo)
 
                 tripleCollector.addStatement(
                     arrayTypeURI,
@@ -593,10 +604,10 @@ class ClassMapper : IMapper {
 
                 // Now we need to clarify the type of the array elements
                 val componentType = try {
-                    JavaType.LoadedType(arrayType.componentType())
-                } catch (e: ClassNotLoadedException) {
-                    JavaType.UnloadedType(arrayType.componentTypeName())
-                }
+                        JavaType.LoadedType(arrayType.componentType())
+                    } catch (e: ClassNotLoadedException) {
+                        JavaType.UnloadedType(arrayType.componentTypeName())
+                    }
 
                 // Arrays are also a class (punning) where all member individuals are
                 // members of
@@ -621,9 +632,7 @@ class ClassMapper : IMapper {
                                     URIs.rdfs.subClassOf,
                                     URIs.java.PrimitiveArray
                                 )
-                            else -> {
-                                logger.error("Encountered unknown kind of type: ${componentType.type}")
-                            }
+                            else -> logger.error("Encountered unknown kind of type: ${componentType.type}")
                         }
                     }
 
@@ -643,7 +652,8 @@ class ClassMapper : IMapper {
                 if (buildParameters.limiter.canReferenceTypeBeSkipped(interfaceType))
                     return
 
-                val interfaceURI = URIs.prog.genReferenceTypeURI(interfaceType)
+                val interfaceTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(interfaceType)
+                val interfaceURI = URIs.prog.genReferenceTypeURI(interfaceTypeInfo)
 
                 tripleCollector.addStatement(
                     interfaceURI,
@@ -672,10 +682,11 @@ class ClassMapper : IMapper {
                     )
                 } else {
                     for (superInterface in superInterfaces) {
+                        val superInterfaceInfo = buildParameters.typeInfoProvider.getTypeInfo(superInterface)
                         tripleCollector.addStatement(
                             interfaceURI,
                             URIs.rdfs.subClassOf,
-                            URIs.prog.genReferenceTypeURI(superInterface)
+                            URIs.prog.genReferenceTypeURI(superInterfaceInfo)
                         )
                     }
                 }

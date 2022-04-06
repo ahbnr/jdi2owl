@@ -15,3 +15,33 @@ interface Logger {
     fun errorStream(): OutputStream
     fun successStream(): OutputStream
 }
+
+class BasicLogger: Logger {
+    override fun debug(line: String, appendNewline: Boolean) =
+        log(line, appendNewline)
+
+    override fun log(line: String, appendNewline: Boolean) {
+        if (appendNewline) println(line)
+        else print(line)
+    }
+
+    override fun emphasize(line: String, appendNewline: Boolean) =
+        log(line, appendNewline)
+
+    override fun success(line: String, appendNewline: Boolean) =
+        log(line, appendNewline)
+
+    override fun warning(line: String, appendNewline: Boolean) =
+        log(line, appendNewline)
+
+    override fun error(line: String, appendNewline: Boolean) =
+        log(line, appendNewline)
+
+    override fun logStream(): OutputStream = System.out
+
+    override fun warningStream(): OutputStream = logStream()
+
+    override fun errorStream(): OutputStream = logStream()
+
+    override fun successStream(): OutputStream = logStream()
+}

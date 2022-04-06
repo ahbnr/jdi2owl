@@ -6,6 +6,7 @@ import spoon.reflect.CtModel
 
 data class BuildParameters(
     val jvmState: JvmState,
+    val typeInfoProvider: TypeInfoProvider,
     val sourceModel: CtModel,
     val limiter: MappingLimiter
 )

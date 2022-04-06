@@ -2,19 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     // id("com.github.johnrengelman.shadow") version "7.1.0"
-
-    // Dirty hack to make this project work as a standalone library as well as a sub-project of the sjdb
-    // multi-project build
-    // The problem is, that multi-project builds do not allow multiple plugin version
-    // specifications. Hence, we turn off the version specification, if there is a root
-    // project file above this directory.
-    if (File("../settings.gradle.kts").exists()) {
-        kotlin("jvm")
-    }
-
-    else {
-        kotlin("jvm") version "1.5.31"
-    }
+    kotlin("jvm")
 }
 
 group = "de.ahbnr.semanticweb"
@@ -59,6 +47,13 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
+tasks.test {
+    useJUnitPlatform()
+    jvmArgs = listOf(
+        "--add-opens", "jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED"
+    )
+}
+
 // tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
 //     archiveBaseName.set("jdi2owl")
 //     mergeServiceFiles()
@@ -73,6 +68,17 @@ dependencies {
 tasks.withType<JavaCompile>() {
     sourceCompatibility = "11"
     targetCompatibility = "11"
+
+    options.compilerArgs.addAll(
+        listOf(
+            // This should be supplied to javac to tell it that we may access internal package names at compile time.
+            // We circumvent this by using the kotlinc compiler and telling it to ignore these errors by @Suppress annotations in the code
+            //
+            // Due to these two reasons, this line is probably unnecessary, but we add it for good measure
+            "--add-exports", "jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED",
+            // See also https://nipafx.dev/five-command-line-options-hack-java-module-system/
+        )
+    )
 }
 
 tasks.withType<KotlinCompile>() {
@@ -91,8 +97,4 @@ tasks.jar {
             )
         )
     }
-}
-
-tasks.getByName<Test>("test") {
-    useJUnitPlatform()
 }
