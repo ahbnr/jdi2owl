@@ -37,11 +37,13 @@ class RCNTests {
         private lateinit var ns: Namespaces
         private lateinit var sourceModel: CtModel
         private lateinit var limiter: MappingLimiter
+        private lateinit var IRIs: OntURIs
 
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
             ns = genDefaultNs()
+            IRIs = OntURIs(ns)
 
             // Setup dependency injection
             @Suppress("USELESS_CAST")
@@ -49,7 +51,7 @@ class RCNTests {
                 modules(
                     module {
                         single { BasicLogger() as Logger }
-                        single { OntURIs(ns) }
+                        single { IRIs }
                     }
                 )
             }
@@ -216,15 +218,27 @@ class RCNTests {
     @Test
     fun `RCNs of methods are correct`() {
         val rdfGraph = inspectClass("Methods", 18)
+
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Methods.-void-someMethod%28%29")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Methods.-NotYetLoaded~RCNTests.Methods%24NotLoaded-notLoadedTypesMethod%28NotYetLoaded~RCNTests.Methods%24NotLoaded%29")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Methods%24StaticMemberClass.-void-someMethod%28%29")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Methods%24StaticMemberClass.-SysLoader~RCNTests.Methods%24StaticMemberClass-complexMethod%28SysLoader~RCNTests.Methods%24StaticMemberClass%2CSysLoader~RCNTests.Methods%24StaticMemberClass%29")
+    }
+
+    @Test
+    fun `RCNs of variables are correct`() {
+        val rdfGraph = inspectClass("Variables", 21)
         RDFWriter
             .create(rdfGraph)
             .lang(Lang.TURTLE)
             .format(RDFFormat.TURTLE_PRETTY)
             .output(File("datatest.ttl").outputStream())
 
-        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Methods.-void-someMethod%28%29")
-        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Methods.-NotYetLoaded~RCNTests.Methods%24NotLoaded-notLoadedTypesMethod%28NotYetLoaded~RCNTests.Methods%24NotLoaded%29")
-        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Methods%24StaticMemberClass.-void-someMethod%28%29")
-        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Methods%24StaticMemberClass.-SysLoader~RCNTests.Methods%24StaticMemberClass-complexMethod%28SysLoader~RCNTests.Methods%24StaticMemberClass%2CSysLoader~RCNTests.Methods%24StaticMemberClass%29")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Variables.-void-someMethod%28%29.myVar")
+        assertContainsResource(
+            rdfGraph,
+            IRIs.java.VariableDeclaration,
+            Regex("SysLoader~RCNTests.Variables.-void-sameVarTwice%28%29.myVar~\\d+$")
+        )
     }
 }
