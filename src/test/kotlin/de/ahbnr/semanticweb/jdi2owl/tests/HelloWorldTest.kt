@@ -41,16 +41,16 @@ class HelloWorldTest: TestBase() {
 
     @Test
     fun `HelloWorld class is present`() {
-        assertContainsProgResource(rdfGraph, "SysLoader~HelloWorld")
+        assertContainsProgResource(rdfGraph, "SysLoader-HelloWorld")
     }
 
     @Test
     fun `main method is present`() {
-        assertContainsProgResource(rdfGraph, "SysLoader~HelloWorld.-void-main%28java.lang.String%5B%5D%29")
+        assertContainsProgResource(rdfGraph, "SysLoader-HelloWorld.-void-main%28java.lang.String%5B%5D%29")
     }
 
     @Test
     fun `args parameter is present`() {
-        assertContainsProgResource(rdfGraph, "SysLoader~HelloWorld.-void-main%28java.lang.String%5B%5D%29.args")
+        assertContainsProgResource(rdfGraph, "SysLoader-HelloWorld.-void-main%28java.lang.String%5B%5D%29.args")
     }
 }

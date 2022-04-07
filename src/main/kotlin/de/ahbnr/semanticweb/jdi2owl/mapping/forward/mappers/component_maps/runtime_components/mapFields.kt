@@ -12,7 +12,8 @@ fun mapFields(context: ObjectContext) {
             if (field.isStatic) // Static fields are handled by addStaticClassMembers
                 continue
 
-            val fieldInfo = typeInfo.getFieldInfo(field)
+            val declaringTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(field.declaringType())
+            val fieldInfo = declaringTypeInfo.getFieldInfo(field)
             val fieldIRI = IRIs.prog.genFieldIRI(fieldInfo)
 
             withFieldValueContext(value, fieldReceiverIRI = objectIRI, fieldInfo, fieldIRI) {

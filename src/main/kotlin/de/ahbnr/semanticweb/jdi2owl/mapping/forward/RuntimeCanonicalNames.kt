@@ -34,7 +34,12 @@ interface HasRCN {
     val rcn: String
 }
 
-class FieldInfo(typeInfo: TypeInfo.ReferenceTypeInfo, val jdiField: Field): HasRCN {
+class FieldInfo(val typeInfo: TypeInfo.ReferenceTypeInfo.CreatedType, val jdiField: Field): HasRCN {
+    init {
+        if (typeInfo.jdiType != jdiField.declaringType())
+            throw java.lang.IllegalArgumentException("The JDI field instance does not belong to the given declaring type.")
+    }
+
     override val rcn: String = "${typeInfo.rcn}.${jdiField.name()}"
 }
 
@@ -77,9 +82,9 @@ sealed class TypeInfo(
                         if (classLoader == null)
                             typeName
                         else if (classLoader.uniqueID() == systemClassLoaderId)
-                            "SysLoader~$typeName"
+                            "SysLoader-$typeName"
                         else
-                            "Loader${classLoader.uniqueID()}~$typeName"
+                            "Loader${classLoader.uniqueID()}-$typeName"
                 }
 
                 class Class(
@@ -108,7 +113,7 @@ sealed class TypeInfo(
             typeInfoProvider: TypeInfoProvider,
             val binaryName: String
         ): ReferenceTypeInfo(typeInfoProvider) {
-            override val rcn: String = "NotYetLoaded~$binaryName"
+            override val rcn: String = "NotYetLoaded-$binaryName"
         }
     }
 }
