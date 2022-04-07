@@ -21,7 +21,7 @@ data class LocalVariableInfo(
             // If there are multiple variables with the same name in different blocks, we have to differentiate them
             // by the code index of the start of their scope
             val scopeStartCodeIndex = InternalJDIUtils.getScopeStart(jdiLocalVariable).codeIndex()
-            "${jdiLocalVariable.name()}~$scopeStartCodeIndex"
+            "${jdiLocalVariable.name()}-$scopeStartCodeIndex"
         }
     }
 
