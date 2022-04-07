@@ -226,13 +226,16 @@ class RCNTests {
     }
 
     @Test
+    fun `RCNs of constructors are correct`() {
+        val rdfGraph = inspectClass("Constructors", 13)
+
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Constructors%24StaticMemberClass.-void-%3Cinit%3E%28%29")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Constructors%24StaticMemberClass.-void-%3Cinit%3E%28SysLoader~RCNTests.Constructors%24StaticMemberClass%2CSysLoader~RCNTests.Constructors%24StaticMemberClass%29")
+    }
+
+    @Test
     fun `RCNs of variables are correct`() {
         val rdfGraph = inspectClass("Variables", 21)
-        RDFWriter
-            .create(rdfGraph)
-            .lang(Lang.TURTLE)
-            .format(RDFFormat.TURTLE_PRETTY)
-            .output(File("datatest.ttl").outputStream())
 
         assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Variables.-void-someMethod%28%29.myVar")
         assertContainsResource(

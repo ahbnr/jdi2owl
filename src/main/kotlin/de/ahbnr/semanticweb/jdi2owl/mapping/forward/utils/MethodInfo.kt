@@ -22,6 +22,7 @@ import spoon.reflect.declaration.CtMethod
 import spoon.reflect.path.CtPathStringBuilder
 import spoon.reflect.visitor.filter.LocalVariableScopeFunction
 import spoon.reflect.visitor.filter.TypeFilter
+import kotlin.math.log
 
 class MethodInfo(
     val typeInfoProvider: TypeInfoProvider,
@@ -63,6 +64,7 @@ class MethodInfo(
             }
         }
 
+        // Btw: For constructors the return type will be "void" and the name will be "<init>"
         rcn = "${declaringTypeInfo.rcn}.-${returnTypeInfo.rcn}-${jdiMethod.name()}(${argumentRCNs.joinToString(",")})"
     }
 
