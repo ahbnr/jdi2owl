@@ -16,9 +16,9 @@ class MappingLimiter(
     private fun isShallow(referenceType: ReferenceType) =
         isExcluded(referenceType) || settings.allShallowPackages.any { referenceType.name().startsWith(it) }
 
-    private fun isDeep(fullyQualifiedFieldOrVariableName: String) =
+    private fun isDeep(fieldOrVariableRCN: String) =
         settings.deepFieldsAndVariables.any {
-            fullyQualifiedFieldOrVariableName.startsWith(it)
+            fieldOrVariableRCN.startsWith(it)
         }
 
     fun canReferenceTypeBeSkipped(unloadedTypeName: String) =

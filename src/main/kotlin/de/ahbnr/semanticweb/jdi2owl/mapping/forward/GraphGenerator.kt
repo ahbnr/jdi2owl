@@ -10,6 +10,7 @@ import de.ahbnr.semanticweb.jdi2owl.mapping.Namespaces
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.macros.Chain
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.UniversalKnowledgeBaseParser
 import de.ahbnr.semanticweb.jdi2owl.Logger
+import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
 import org.apache.jena.rdf.model.Model
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -20,13 +21,13 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.nio.file.Path
 
-class ParserException() : Exception()
+class ParserException: Exception()
 
 class GraphGenerator(
-    private val ns: Namespaces,
     private val mappers: List<IMapper>
 ) : KoinComponent {
     private val logger: Logger by inject()
+    private val IRIs: OntURIs by inject()
 
     private val macros = arrayOf(Chain())
 
@@ -50,8 +51,8 @@ class GraphGenerator(
     }
 
     private fun mapProgramState(buildParameters: BuildParameters, model: Model) {
-        model.setNsPrefix("run", ns.run)
-        model.setNsPrefix("local", ns.local)
+        model.setNsPrefix("run", IRIs.ns.run)
+        model.setNsPrefix("local", IRIs.ns.local)
 
         for (mapper in mappers) {
             mapper.extendModel(buildParameters, model)
