@@ -151,7 +151,8 @@ class JvmObjectIterator(
                 if (value !is ObjectReference)
                     continue
 
-                contextRecorder?.addContext(value, ReferenceContexts.Context.ReferencedByField(typeInfo.getFieldInfo(field)))
+                val declaringTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(field.declaringType())
+                contextRecorder?.addContext(value, ReferenceContexts.Context.ReferencedByField(declaringTypeInfo.getFieldInfo(field)))
 
                 yieldAll(
                     recursivelyIterateObject(value)
