@@ -11,7 +11,7 @@ fun mapLocalVariable(context: VariableValueContext) = with(context) {
     if (valueObject != null) {
         tripleCollector.addStatement(
             frameIRI,
-            IRIs.prog.genVariableDeclarationURI(variableInfo),
+            IRIs.prog.genVariableDeclarationIRI(variableInfo),
             valueObject
         )
 

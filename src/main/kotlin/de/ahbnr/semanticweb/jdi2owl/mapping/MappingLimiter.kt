@@ -2,8 +2,6 @@ package de.ahbnr.semanticweb.jdi2owl.mapping
 
 import com.sun.jdi.*
 import de.ahbnr.semanticweb.jdi2owl.debugging.ReferenceContexts
-import de.ahbnr.semanticweb.jdi2owl.debugging.utils.getFullyQualifiedName
-import de.ahbnr.semanticweb.jdi2owl.debugging.utils.getFullyQualifiedNamePrefix
 
 class MappingLimiter(
     val settings: MappingSettings
@@ -80,7 +78,7 @@ class MappingLimiter(
         val namesOfReferencingVars = referenceContexts
             ?.getStackReferences(containerRef)
             ?.asSequence()
-            ?.map { getFullyQualifiedNamePrefix(it.method, it.variable) }
+            ?.map { it.variableInfo.rcn }
         if (namesOfReferencingVars?.any { isDeep(it) } == true) {
             return false
         }
@@ -88,7 +86,7 @@ class MappingLimiter(
         val namesOfReferencingFields = referenceContexts
             ?.getReferencingFields(containerRef)
             ?.asSequence()
-            ?.map { field -> getFullyQualifiedName(field) }
+            ?.map { field -> field.rcn }
 
         if (namesOfReferencingFields?.any { isDeep(it) } == true) {
             return false

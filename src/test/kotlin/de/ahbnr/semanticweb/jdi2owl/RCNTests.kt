@@ -18,7 +18,6 @@ import org.apache.jena.riot.RDFFormat
 import org.apache.jena.riot.RDFWriter
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -28,8 +27,6 @@ import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import spoon.reflect.CtModel
 import java.io.File
-import java.nio.file.Files
-import kotlin.io.path.listDirectoryEntries
 
 class RCNTests {
     private var debugger: JvmDebugger? = null
@@ -137,40 +134,44 @@ class RCNTests {
         return ontology!!.asGraphModel()
     }
 
-    private fun assertContainsType(rdfGraph: Model, typeName: String) {
+    private fun assertContainsProgResource(rdfGraph: Model, resourceName: String) {
         assertTrue(
             rdfGraph.containsResource(
-                rdfGraph.getResource(ns.prog + typeName)
+                rdfGraph.getResource(ns.prog + resourceName)
             )
         )
     }
 
-    private fun assertContainsType(rdfGraph: Model, typeNameRegex: Regex) {
+    private fun assertContainsResource(rdfGraph: Model, rdfType: String, resourceNameRegex: Regex) {
         assertTrue(
             rdfGraph
-                .listResourcesWithProperty(rdfGraph.getProperty(ns.rdf + "type"), rdfGraph.getResource(ns.owl + "Class"))
+                .listResourcesWithProperty(rdfGraph.getProperty(ns.rdf + "type"), rdfGraph.getResource(rdfType))
                 .asSequence()
                 .any {
-                    it.isURIResource && it.uri.contains(typeNameRegex)
+                    it.isURIResource && it.uri.contains(resourceNameRegex)
                 }
         )
+    }
+
+    private fun assertContainsType(rdfGraph: Model, typeNameRegex: Regex) {
+        assertContainsResource(rdfGraph, ns.owl + "Class", typeNameRegex)
     }
 
     @Test
     fun `RCNs of top-level types are correct`() {
         val rdfGraph = inspectClass("TopLevelType", 11)
 
-        assertContainsType(rdfGraph, "SysLoader~RCNTests.TopLevelClass")
-        assertContainsType(rdfGraph, "SysLoader~RCNTests.TopLevelInterface")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.TopLevelClass")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.TopLevelInterface")
     }
 
     @Test
     fun `RCNs of member types are correct`() {
         val rdfGraph = inspectClass("MemberType", 17)
 
-        assertContainsType(rdfGraph, "SysLoader~RCNTests.MyClass%24MemberClass")
-        assertContainsType(rdfGraph, "SysLoader~RCNTests.MyClass%24MemberInterface")
-        assertContainsType(rdfGraph, "SysLoader~RCNTests.MyClass%24StaticMemberClass")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.MyClass%24MemberClass")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.MyClass%24MemberInterface")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.MyClass%24StaticMemberClass")
     }
 
     @Test
@@ -193,19 +194,37 @@ class RCNTests {
     fun `RCNs of array types are correct`() {
         val rdfGraph = inspectClass("ArrayType", 11)
 
-        assertContainsType(rdfGraph, "SysLoader~RCNTests.MyClass%24StaticMemberClass%5B%5D")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.MyClass%24StaticMemberClass%5B%5D")
     }
 
     @Test
     fun `RCNs of user-loaded types are correct`() {
         val rdfGraph = inspectClass("UserLoadedType", 33)
+
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.UserLoadedType")
+        assertContainsType(rdfGraph, Regex("Loader\\d+~RCNTests.UserLoadedType$"))
+    }
+
+    @Test
+    fun `RCNs of fields are correct`() {
+        val rdfGraph = inspectClass("Fields", 13)
+
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Fields.instanceField")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Fields%24StaticMemberClass.staticField")
+    }
+
+    @Test
+    fun `RCNs of methods are correct`() {
+        val rdfGraph = inspectClass("Methods", 18)
         RDFWriter
             .create(rdfGraph)
             .lang(Lang.TURTLE)
             .format(RDFFormat.TURTLE_PRETTY)
             .output(File("datatest.ttl").outputStream())
 
-        assertContainsType(rdfGraph, "SysLoader~RCNTests.UserLoadedType")
-        assertContainsType(rdfGraph, Regex("Loader\\d+~RCNTests.UserLoadedType$"))
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Methods.-void-someMethod%28%29")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Methods.-NotYetLoaded~RCNTests.Methods%24NotLoaded-notLoadedTypesMethod%28NotYetLoaded~RCNTests.Methods%24NotLoaded%29")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Methods%24StaticMemberClass.-void-someMethod%28%29")
+        assertContainsProgResource(rdfGraph, "SysLoader~RCNTests.Methods%24StaticMemberClass.-SysLoader~RCNTests.Methods%24StaticMemberClass-complexMethod%28SysLoader~RCNTests.Methods%24StaticMemberClass%2CSysLoader~RCNTests.Methods%24StaticMemberClass%29")
     }
 }

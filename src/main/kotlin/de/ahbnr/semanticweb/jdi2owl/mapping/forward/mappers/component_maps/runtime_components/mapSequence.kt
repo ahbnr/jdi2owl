@@ -1,8 +1,5 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.runtime_components
 
-import com.sun.jdi.ObjectReference
-import com.sun.jdi.PrimitiveType
-import com.sun.jdi.ReferenceType
 import com.sun.jdi.Value
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TripleCollector
@@ -100,8 +97,8 @@ fun mapSequence(context: SequenceContext) {
         // # More concrete hasElement relation
         // Create sub-relation of hasElement<Type> relation for this particular array/iterable object to encode
         // the container size in the cardinalit == nully
-        val typedHasElementURI = IRIs.prog.genTypedHasElementURI(componentTypeInfo)
-        val typedSequenceElementURI = IRIs.prog.genTypedSequenceElementURI(componentTypeInfo)
+        val typedHasElementURI = IRIs.prog.genTypedHasElementIRI(componentTypeInfo)
+        val typedSequenceElementURI = IRIs.prog.genTypedSequenceElementIRI(componentTypeInfo)
 
         // add the actual elements
         for ((idx, elementValue) in elements.withIndex()) {
@@ -158,7 +155,7 @@ fun mapSequence(context: SequenceContext) {
             if (valueNode != null) {
                 when (val componentTypeInfo = componentTypeInfo) {
                     is TypeInfo.PrimitiveTypeInfo -> {
-                        val typedStoresPrimitiveURI = IRIs.prog.genTypedStoresPrimitiveURI(componentTypeInfo)
+                        val typedStoresPrimitiveURI = IRIs.prog.genTypedStoresPrimitiveIRI(componentTypeInfo)
                         tripleCollector.addStatement(
                             elementInstanceURI,
                             typedStoresPrimitiveURI,
@@ -166,7 +163,7 @@ fun mapSequence(context: SequenceContext) {
                         )
                     }
                     is TypeInfo.ReferenceTypeInfo -> {
-                        val typedStoresReferenceURI = IRIs.prog.genTypedStoresReferenceURI(componentTypeInfo)
+                        val typedStoresReferenceURI = IRIs.prog.genTypedStoresReferenceIRI(componentTypeInfo)
                         tripleCollector.addStatement(
                             elementInstanceURI,
                             typedStoresReferenceURI,

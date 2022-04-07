@@ -4,13 +4,12 @@ import com.sun.jdi.*
 import de.ahbnr.semanticweb.jdi2owl.debugging.mirrors.IterableMirror
 import de.ahbnr.semanticweb.jdi2owl.debugging.mirrors.utils.MirroringError
 import de.ahbnr.semanticweb.jdi2owl.Logger
-import de.ahbnr.semanticweb.jdi2owl.mapping.MappingLimiter
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.BuildParameters
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class JvmObjectIterator(
-    private val thread: ThreadReference,
-    private val limiter: MappingLimiter,
+    private val buildParameters: BuildParameters,
     private val contextRecorder: ReferenceContexts?
 ) : KoinComponent {
     private val logger: Logger by inject()
@@ -19,6 +18,8 @@ class JvmObjectIterator(
     private val seen = mutableSetOf<Long>()
 
     private var encounteredAbsentInformationError = false
+
+    private val thread = buildParameters.jvmState.pausedThread
 
     /**
      * Utility function to iterate over all objects
@@ -88,7 +89,9 @@ class JvmObjectIterator(
             // can invalidate frame references.
 
             fun frame() = thread.frame(frameDepth)
-            val method = frame().location().method()
+            val jdiMethod = frame().location().method()
+            val declaringTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(jdiMethod.declaringType())
+            val methodInfo = declaringTypeInfo.getMethodInfo(jdiMethod)
 
             val thisRef = frame().thisObject()
             if (thisRef != null) {
@@ -111,7 +114,7 @@ class JvmObjectIterator(
                             if (value is ObjectReference) {
                                 contextRecorder.addContext(
                                     value,
-                                    ReferenceContexts.Context.ReferencedByStack(method, variable)
+                                    ReferenceContexts.Context.ReferencedByStack(methodInfo.getVariableInfo(variable))
                                 )
                                 value
                             } else null
@@ -129,7 +132,9 @@ class JvmObjectIterator(
         val allReferenceTypes = vm.allClasses()
 
         for (referenceType in allReferenceTypes) {
-            if (limiter.canReferenceTypeBeSkipped(referenceType))
+            val typeInfo = buildParameters.typeInfoProvider.getTypeInfo(referenceType)
+
+            if (buildParameters.limiter.canReferenceTypeBeSkipped(referenceType))
                 continue
 
             if (!referenceType.isPrepared)
@@ -139,14 +144,14 @@ class JvmObjectIterator(
                 if (!field.isStatic)
                     continue
 
-                if (limiter.canFieldBeSkipped(field))
+                if (buildParameters.limiter.canFieldBeSkipped(field))
                     continue
 
                 val value = referenceType.getValue(field)
                 if (value !is ObjectReference)
                     continue
 
-                contextRecorder?.addContext(value, ReferenceContexts.Context.ReferencedByField(field))
+                contextRecorder?.addContext(value, ReferenceContexts.Context.ReferencedByField(typeInfo.getFieldInfo(field)))
 
                 yieldAll(
                     recursivelyIterateObject(value)
@@ -173,7 +178,7 @@ class JvmObjectIterator(
         if (hasBeenDeepInspected.contains(id))
             return@sequence
 
-        if (limiter.canSequenceBeSkipped(value, contextRecorder))
+        if (buildParameters.limiter.canSequenceBeSkipped(value, contextRecorder))
             return@sequence
 
         hasBeenDeepInspected.add(id)
@@ -199,15 +204,16 @@ class JvmObjectIterator(
         seen.add(id)
 
         val referenceType = objectReference.referenceType()
+        val typeInfo = buildParameters.typeInfoProvider.getTypeInfo(referenceType)
 
-        if (limiter.canReferenceTypeBeSkipped(referenceType))
+        if (buildParameters.limiter.canReferenceTypeBeSkipped(referenceType))
             return@sequence
 
         for (field in referenceType.allFields()) {
             if (field.isStatic)
                 continue
 
-            if (limiter.canFieldBeSkipped(field))
+            if (buildParameters.limiter.canFieldBeSkipped(field))
                 continue
 
             val value = objectReference.getValue(field)
@@ -215,7 +221,7 @@ class JvmObjectIterator(
             if (value !is ObjectReference)
                 continue
 
-            contextRecorder?.addContext(value, ReferenceContexts.Context.ReferencedByField(field))
+            contextRecorder?.addContext(value, ReferenceContexts.Context.ReferencedByField(typeInfo.getFieldInfo(field)))
             yieldAll(recursivelyIterateObject(value))
 
             // Now that we have a field context, maybe the object is eligible for deep iteration

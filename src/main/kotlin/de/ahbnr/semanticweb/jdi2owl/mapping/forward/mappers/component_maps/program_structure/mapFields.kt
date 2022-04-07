@@ -1,8 +1,6 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.program_structure
 
 import com.sun.jdi.ClassNotLoadedException
-import com.sun.jdi.PrimitiveType
-import com.sun.jdi.ReferenceType
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.FieldInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.utils.addReferenceOrNullClass
@@ -18,7 +16,7 @@ fun mapFields(context: CreatedTypeContext) {
             val fieldInfo = typeInfo.getFieldInfo(field)
             // A field is a property (of a class instance).
             // Hence, we model it as a property in the ontology
-            val fieldIRI = IRIs.prog.genFieldURI(fieldInfo)
+            val fieldIRI = IRIs.prog.genFieldIRI(fieldInfo)
 
             withFieldContext(fieldInfo, fieldIRI) {
                 mapField(this)
@@ -77,7 +75,7 @@ fun mapField(context: FieldContext) {
                     tripleCollector.addStatement(
                         fieldIRI,
                         IRIs.rdfs.range,
-                        withCreatedTypeContext( fieldTypeInfo, IRIs.prog.genReferenceTypeURI(fieldTypeInfo) ) {
+                        withCreatedTypeContext( fieldTypeInfo, IRIs.prog.genReferenceTypeIRI(fieldTypeInfo) ) {
                             addReferenceOrNullClass(this)
                         }
                     )
@@ -143,7 +141,7 @@ fun mapField(context: FieldContext) {
 
             is JavaType.UnloadedType -> {
                 val fieldTypeInfo = buildParameters.typeInfoProvider.getNotYetLoadedTypeInfo(fieldType.typeName)
-                val fieldTypeIRI = IRIs.prog.genReferenceTypeURI(fieldTypeInfo)
+                val fieldTypeIRI = IRIs.prog.genReferenceTypeIRI(fieldTypeInfo)
 
                 withNotYetLoadedTypeContext(
                     fieldTypeInfo,

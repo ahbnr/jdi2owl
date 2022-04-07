@@ -12,7 +12,7 @@ fun mapStaticClassMembers(context: ObjectMappingContext) = with(context) {
             continue // skip those class types which have not been fully prepared in the vm state yet
 
         val typeInfo = buildParameters.typeInfoProvider.getTypeInfo(classType)
-        val typeIRI = IRIs.prog.genReferenceTypeURI(typeInfo)
+        val typeIRI = IRIs.prog.genReferenceTypeIRI(typeInfo)
 
         val fieldValues = classType.getValues(classType.fields().filter { it.isStatic })
 
@@ -23,7 +23,7 @@ fun mapStaticClassMembers(context: ObjectMappingContext) = with(context) {
                 value,
                 fieldReceiverIRI = typeIRI,
                 fieldInfo = fieldInfo,
-                fieldIRI = IRIs.prog.genFieldURI(fieldInfo)
+                fieldIRI = IRIs.prog.genFieldIRI(fieldInfo)
             ) {
                 mapField(this)
             }

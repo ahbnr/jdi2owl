@@ -6,6 +6,7 @@ import com.sun.jdi.ClassType
 import com.sun.jdi.Field
 import com.sun.jdi.InterfaceType
 import com.sun.jdi.LocalVariable
+import com.sun.jdi.Method
 import com.sun.jdi.PrimitiveType
 import com.sun.jdi.ReferenceType
 import com.sun.jdi.ThreadReference
@@ -37,26 +38,36 @@ class FieldInfo(typeInfo: TypeInfo.ReferenceTypeInfo, val jdiField: Field): HasR
     override val rcn: String = "${typeInfo.rcn}.${jdiField.name()}"
 }
 
-sealed class TypeInfo: HasRCN {
-    class VoidTypeInfo(val type: VoidType): TypeInfo() {
+sealed class TypeInfo(
+    protected val typeInfoProvider: TypeInfoProvider
+): HasRCN {
+    class VoidTypeInfo(typeInfoProvider: TypeInfoProvider, val type: VoidType): TypeInfo(typeInfoProvider) {
         override val rcn: String = "void"
     }
 
-    class PrimitiveTypeInfo(val jdiType: PrimitiveType): TypeInfo() {
+    class PrimitiveTypeInfo(typeInfoProvider: TypeInfoProvider, val jdiType: PrimitiveType): TypeInfo(typeInfoProvider) {
         override val rcn: String = jdiType.name()
     }
 
-    sealed class ReferenceTypeInfo: TypeInfo() {
+    sealed class ReferenceTypeInfo(
+        typeInfoProvider: TypeInfoProvider
+    ): TypeInfo(typeInfoProvider) {
         sealed class CreatedType(
+            typeInfoProvider: TypeInfoProvider,
             open val jdiType: ReferenceType
-        ): ReferenceTypeInfo() {
+        ): ReferenceTypeInfo(typeInfoProvider) {
             fun getFieldInfo(field: Field) = FieldInfo(this, field)
+            fun getMethodInfo(jdiMethod: Method) = MethodInfo(typeInfoProvider, jdiMethod)
 
             sealed class ClassOrInterface: CreatedType {
                 override val jdiType: ReferenceType
                 override val rcn: String
 
-                constructor(jdiType: ReferenceType, systemClassLoaderId: Long?): super(jdiType) {
+                constructor(
+                    typeInfoProvider: TypeInfoProvider,
+                    jdiType: ReferenceType,
+                    systemClassLoaderId: Long?
+                ): super(typeInfoProvider, jdiType) {
                     this.jdiType = jdiType
 
                     val classLoader = jdiType.classLoader()
@@ -72,22 +83,31 @@ sealed class TypeInfo: HasRCN {
                 }
 
                 class Class(
+                    typeInfoProvider: TypeInfoProvider,
                     override val jdiType: ClassType,
                     systemClassLoaderId: Long?
-                ): ClassOrInterface(jdiType, systemClassLoaderId)
+                ): ClassOrInterface(typeInfoProvider, jdiType, systemClassLoaderId)
 
                 class Interface(
+                    typeInfoProvider: TypeInfoProvider,
                     override val jdiType: InterfaceType,
                     systemClassLoaderId: Long?
-                ): ClassOrInterface(jdiType, systemClassLoaderId)
+                ): ClassOrInterface(typeInfoProvider, jdiType, systemClassLoaderId)
             }
 
-            class ArrayType(override val jdiType: com.sun.jdi.ArrayType, val componentType: TypeInfo): CreatedType(jdiType) {
+            class ArrayType(
+                typeInfoProvider: TypeInfoProvider,
+                override val jdiType: com.sun.jdi.ArrayType,
+                val componentType: TypeInfo
+            ): CreatedType(typeInfoProvider, jdiType) {
                 override val rcn: String = "${componentType.rcn}[]"
             }
         }
 
-        class NotYetLoadedType(val binaryName: String): ReferenceTypeInfo() {
+        class NotYetLoadedType(
+            typeInfoProvider: TypeInfoProvider,
+            val binaryName: String
+        ): ReferenceTypeInfo(typeInfoProvider) {
             override val rcn: String = "NotYetLoaded~$binaryName"
         }
     }
@@ -110,13 +130,13 @@ class TypeInfoProvider(mainThread: ThreadReference) {
         }
 
         val typeInfo = when (type) {
-            is PrimitiveType -> TypeInfo.PrimitiveTypeInfo(type)
+            is PrimitiveType -> TypeInfo.PrimitiveTypeInfo(this, type)
             is ReferenceType -> when (type) {
                 is ClassType ->
-                    TypeInfo.ReferenceTypeInfo.CreatedType.ClassOrInterface.Class(type, systemClassLoaderId)
+                    TypeInfo.ReferenceTypeInfo.CreatedType.ClassOrInterface.Class(this, type, systemClassLoaderId)
 
                 is InterfaceType ->
-                    TypeInfo.ReferenceTypeInfo.CreatedType.ClassOrInterface.Interface(type, systemClassLoaderId)
+                    TypeInfo.ReferenceTypeInfo.CreatedType.ClassOrInterface.Interface(this, type, systemClassLoaderId)
 
                 is ArrayType -> {
                     val componentTypeInfo = try {
@@ -125,13 +145,13 @@ class TypeInfoProvider(mainThread: ThreadReference) {
                         getNotYetLoadedTypeInfo( type.componentTypeName() )
                     }
 
-                    TypeInfo.ReferenceTypeInfo.CreatedType.ArrayType(type, componentTypeInfo)
+                    TypeInfo.ReferenceTypeInfo.CreatedType.ArrayType(this, type, componentTypeInfo)
                 }
 
                 else -> throw RuntimeException("Encountered reference type which is neither a class, interface, nor array type. This is impossible by the JDI specification.")
             }
 
-            is VoidType -> TypeInfo.VoidTypeInfo(type)
+            is VoidType -> TypeInfo.VoidTypeInfo(this, type)
             else -> throw RuntimeException("Encountered type that is neither a primitive type, a reference type, nor void. This is impossible by the JDI specification.")
         }
 
@@ -143,5 +163,5 @@ class TypeInfoProvider(mainThread: ThreadReference) {
         getTypeInfo(type as Type) as TypeInfo.ReferenceTypeInfo.CreatedType
 
     fun getNotYetLoadedTypeInfo(typeName: String): TypeInfo.ReferenceTypeInfo.NotYetLoadedType =
-        TypeInfo.ReferenceTypeInfo.NotYetLoadedType(typeName)
+        TypeInfo.ReferenceTypeInfo.NotYetLoadedType(this, typeName)
 }

@@ -1,10 +1,6 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.program_structure
 
-import com.sun.jdi.ClassNotLoadedException
-import com.sun.jdi.PrimitiveType
-import com.sun.jdi.ReferenceType
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.JavaType
 
 fun mapInterface(context: InterfaceContext) {
     with(context) {
@@ -43,7 +39,7 @@ fun mapInterface(context: InterfaceContext) {
                 tripleCollector.addStatement(
                     typeIRI,
                     IRIs.rdfs.subClassOf,
-                    IRIs.prog.genReferenceTypeURI(superInterfaceInfo)
+                    IRIs.prog.genReferenceTypeIRI(superInterfaceInfo)
                 )
             }
         }

@@ -35,7 +35,7 @@ fun mapObject(context: ObjectContext) = with(context) {
     tripleCollector.addStatement(
         objectIRI,
         IRIs.rdf.type,
-        IRIs.prog.genReferenceTypeURI(typeInfo)
+        IRIs.prog.genReferenceTypeIRI(typeInfo)
     )
 
     // TODO: This should also apply to non class types

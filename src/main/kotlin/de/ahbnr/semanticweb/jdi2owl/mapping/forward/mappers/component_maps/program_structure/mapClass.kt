@@ -39,7 +39,7 @@ fun mapClass(context: ClassContext) {
             tripleCollector.addStatement(
                 typeIRI,
                 IRIs.rdfs.subClassOf,
-                IRIs.prog.genReferenceTypeURI(superClassInfo)
+                IRIs.prog.genReferenceTypeIRI(superClassInfo)
             )
         } else if (typeInfo.jdiType.name() != "java.lang.Object") {
             tripleCollector.addStatement(
@@ -58,7 +58,7 @@ fun mapClass(context: ClassContext) {
             tripleCollector.addStatement(
                 typeIRI,
                 IRIs.rdfs.subClassOf,
-                IRIs.prog.genReferenceTypeURI(superInterfaceInfo)
+                IRIs.prog.genReferenceTypeIRI(superInterfaceInfo)
             )
         }
 

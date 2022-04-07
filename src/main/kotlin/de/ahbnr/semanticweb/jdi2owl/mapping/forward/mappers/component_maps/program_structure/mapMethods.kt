@@ -6,8 +6,8 @@ import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.MethodInfo
 fun mapMethods(context: CreatedTypeContext) {
     context.apply {
         for (method in typeInfo.jdiType.methods()) { // inherited methods are not included!
-            val methodInfo = MethodInfo(method, buildParameters)
-            val methodIRI = IRIs.prog.genMethodURI(methodInfo)
+            val methodInfo = typeInfo.getMethodInfo(method)
+            val methodIRI = IRIs.prog.genMethodIRI(methodInfo)
 
             withMethodContext(methodInfo, methodIRI) {
                 mapMethod(this)

@@ -1,8 +1,9 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.program_structure
 
+import com.sun.jdi.AbsentInformationException
 import com.sun.jdi.ClassNotLoadedException
-import com.sun.jdi.PrimitiveType
-import com.sun.jdi.ReferenceType
+import com.sun.jdi.ClassType
+import com.sun.jdi.InterfaceType
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.utils.addReferenceOrNullClass
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.JavaType
@@ -12,8 +13,16 @@ import org.apache.jena.graph.NodeFactory
 
 fun mapVariableDeclarations(context: MethodContext) {
     context.apply {
-        for (variableInfo in methodInfo.variables) {
-            val variableIRI = IRIs.prog.genVariableDeclarationURI(variableInfo)
+        val variables = try {
+                methodInfo.jdiMethod.variables()
+            }
+            catch(e: AbsentInformationException) {
+                return
+            }
+
+        for (variable in variables) {
+            val variableInfo = methodInfo.getVariableInfo(variable)
+            val variableIRI = IRIs.prog.genVariableDeclarationIRI(variableInfo)
 
             withVariableDeclarationContext(variableInfo, variableIRI) {
                 mapVariableDeclaration(this)
@@ -75,7 +84,7 @@ fun mapVariableDeclaration(context: VariableDeclarationContext) {
                         // ...and the variable property ranges over the reference type of the variable
                         // and the null value:
 
-                        val variableTypeIRI = IRIs.prog.genReferenceTypeURI(variableTypeInfo)
+                        val variableTypeIRI = IRIs.prog.genReferenceTypeIRI(variableTypeInfo)
                         tripleCollector.addStatement(
                             variableIRI,
                             IRIs.rdfs.range,
@@ -108,7 +117,7 @@ fun mapVariableDeclaration(context: VariableDeclarationContext) {
             }
             is JavaType.UnloadedType -> {
                 val variableTypeInfo = buildParameters.typeInfoProvider.getNotYetLoadedTypeInfo(variableType.typeName)
-                val variableTypeIRI = IRIs.prog.genReferenceTypeURI(typeInfo)
+                val variableTypeIRI = IRIs.prog.genReferenceTypeIRI(typeInfo)
 
                 withNotYetLoadedTypeContext(variableTypeInfo, variableTypeIRI) {
                     mapNotYetLoadedType(this)
@@ -124,7 +133,7 @@ fun mapVariableDeclaration(context: VariableDeclarationContext) {
                 tripleCollector.addStatement(
                     variableIRI,
                     IRIs.rdfs.range,
-                    IRIs.prog.genReferenceTypeURI(notYetLoadedTypeInfo)
+                    IRIs.prog.genReferenceTypeIRI(notYetLoadedTypeInfo)
                 )
             }
         }

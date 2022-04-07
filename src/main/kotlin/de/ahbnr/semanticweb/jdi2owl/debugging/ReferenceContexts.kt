@@ -4,6 +4,8 @@ import com.sun.jdi.Field
 import com.sun.jdi.LocalVariable
 import com.sun.jdi.Method
 import com.sun.jdi.ObjectReference
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.FieldInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.LocalVariableInfo
 
 class ReferenceContexts {
     private val objectIdsToContexts = mutableMapOf<Long, MutableList<Context>>()
@@ -28,15 +30,15 @@ class ReferenceContexts {
             ?.filterIsInstance<Context.ReferencedByStack>()
             ?: emptyList()
 
-    fun getReferencingFields(objectReference: ObjectReference): List<Field> =
+    fun getReferencingFields(objectReference: ObjectReference): List<FieldInfo> =
         objectIdsToContexts
             .getOrDefault(objectReference.uniqueID(), null)
             ?.filterIsInstance<Context.ReferencedByField>()
-            ?.map { it.field }
+            ?.map { it.fieldInfo }
             ?: listOf()
 
     sealed class Context {
-        class ReferencedByStack(val method: Method, val variable: LocalVariable) : Context()
-        class ReferencedByField(val field: Field) : Context()
+        class ReferencedByStack(val variableInfo: LocalVariableInfo) : Context()
+        class ReferencedByField(val fieldInfo: FieldInfo) : Context()
     }
 }

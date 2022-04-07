@@ -3,10 +3,8 @@ package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.runt
 import com.sun.jdi.ObjectReference
 import de.ahbnr.semanticweb.jdi2owl.debugging.JvmObjectIterator
 import de.ahbnr.semanticweb.jdi2owl.debugging.ReferenceContexts
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.contexts.MappingContext
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.ValueToNodeMapper
-import kotlin.jvm.internal.Ref.ObjectRef
 
 fun mapObjects(context: MappingContext) =
     with(context) {
@@ -14,8 +12,7 @@ fun mapObjects(context: MappingContext) =
         val valueMapper = ValueToNodeMapper()
 
         val iterator = JvmObjectIterator(
-            buildParameters.jvmState.pausedThread,
-            buildParameters.limiter,
+            buildParameters,
             referenceContexts
         )
         val allObjects = iterator.iterateObjects().toList()
@@ -36,7 +33,7 @@ fun mapObjects(context: MappingContext) =
 
                 val type = objectReference.referenceType()
                 val typeInfo = buildParameters.typeInfoProvider.getTypeInfo(type)
-                val typeIRI = IRIs.prog.genReferenceTypeURI(typeInfo)
+                val typeIRI = IRIs.prog.genReferenceTypeIRI(typeInfo)
 
                 withObjectContext(
                     `object` = objectReference,

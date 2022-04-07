@@ -8,7 +8,7 @@ fun mapTypeInstanceClosure(context: ObjectMappingContext) = with(context) {
     if (buildParameters.limiter.settings.closeReferenceTypes) {
         for (referenceType in buildParameters.jvmState.pausedThread.virtualMachine().allClasses()) {
             val typeInfo = buildParameters.typeInfoProvider.getTypeInfo(referenceType)
-            val typeIRI = IRIs.prog.genReferenceTypeURI(typeInfo)
+            val typeIRI = IRIs.prog.genReferenceTypeIRI(typeInfo)
 
             withRefTypeContext(
                 typeInfo, typeIRI

@@ -13,7 +13,7 @@ fun mapFields(context: ObjectContext) {
                 continue
 
             val fieldInfo = typeInfo.getFieldInfo(field)
-            val fieldIRI = IRIs.prog.genFieldURI(fieldInfo)
+            val fieldIRI = IRIs.prog.genFieldIRI(fieldInfo)
 
             withFieldValueContext(value, fieldReceiverIRI = objectIRI, fieldInfo, fieldIRI) {
                 mapField(this)

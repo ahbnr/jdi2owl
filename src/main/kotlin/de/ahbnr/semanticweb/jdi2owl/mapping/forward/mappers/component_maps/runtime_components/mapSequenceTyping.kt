@@ -1,7 +1,6 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.runtime_components
 
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.program_structure.withCreatedTypeContext
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.program_structure.withRefTypeContext
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.utils.addReferenceOrNullClass
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TripleCollector
@@ -29,10 +28,10 @@ fun mapSequenceTyping(context: SequenceContext) {
 
         mappedSequenceComponentTypes.add(context.componentTypeInfo!!.rcn)
 
-        val typedSequenceElementURI = IRIs.prog.genTypedSequenceElementURI(componentTypeInfo!!)
+        val typedSequenceElementURI = IRIs.prog.genTypedSequenceElementIRI(componentTypeInfo!!)
 
         // hasElement<type> Relation
-        val typedHasElementURI = IRIs.prog.genTypedHasElementURI(componentTypeInfo!!)
+        val typedHasElementURI = IRIs.prog.genTypedHasElementIRI(componentTypeInfo!!)
 
         tripleCollector.addStatement(
             typedHasElementURI,
@@ -85,7 +84,7 @@ fun mapSequenceTyping(context: SequenceContext) {
 
                 // storesPrimitive Relation
                 val typedStoresPrimitiveURI =
-                    IRIs.prog.genTypedStoresPrimitiveURI(componentTypeInfo)
+                    IRIs.prog.genTypedStoresPrimitiveIRI(componentTypeInfo)
 
                 tripleCollector.addStatement(
                     typedStoresPrimitiveURI,
@@ -141,7 +140,7 @@ fun mapSequenceTyping(context: SequenceContext) {
 
                 // storesReference Relation
                 val typedStoresReferenceURI =
-                    IRIs.prog.genTypedStoresReferenceURI(componentTypeInfo)
+                    IRIs.prog.genTypedStoresReferenceIRI(componentTypeInfo)
 
                 tripleCollector.addStatement(
                     typedStoresReferenceURI,
@@ -167,7 +166,7 @@ fun mapSequenceTyping(context: SequenceContext) {
                     typedSequenceElementURI
                 )
 
-                val componentTypeIRI = IRIs.prog.genReferenceTypeURI(componentTypeInfo)
+                val componentTypeIRI = IRIs.prog.genReferenceTypeIRI(componentTypeInfo)
                 tripleCollector.addStatement(
                     typedStoresReferenceURI,
                     IRIs.rdfs.range,

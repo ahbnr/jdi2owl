@@ -60,7 +60,7 @@ fun mapArrayType(context: ArrayTypeContext) {
 
             is JavaType.UnloadedType -> {
                 val componentTypeInfo = buildParameters.typeInfoProvider.getNotYetLoadedTypeInfo(componentType.typeName)
-                val componentTypeIRI = IRIs.prog.genReferenceTypeURI(componentTypeInfo)
+                val componentTypeIRI = IRIs.prog.genReferenceTypeIRI(componentTypeInfo)
                 withNotYetLoadedTypeContext(componentTypeInfo, componentTypeIRI) {
                     mapNotYetLoadedType(this)
                 }

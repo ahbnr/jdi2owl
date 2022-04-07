@@ -6,9 +6,10 @@ import org.apache.jena.graph.NodeFactory
 fun mapMethodLocation(context: MethodContext) {
     with(context) {
         // add declaration location
-        val declarationLocation = methodInfo.declarationLocation
+        // TODO: This completely depends on source information -> factor it out
+        val declarationLocation = methodInfo.getDeclarationLocation(buildParameters.sourceModel)
         if (declarationLocation != null) {
-            val locationURI = IRIs.prog.genLocationURI(declarationLocation)
+            val locationURI = IRIs.prog.genLocationIRI(declarationLocation)
 
             // it *is* a java:Location
             tripleCollector.addStatement(
@@ -48,7 +49,7 @@ fun mapMethodLocation(context: MethodContext) {
         // add body definition location
         val definitionLocation = methodInfo.definitionLocation
         if (definitionLocation != null) {
-            val locationURI = IRIs.prog.genLocationURI(definitionLocation)
+            val locationURI = IRIs.prog.genLocationIRI(definitionLocation)
 
             // it *is* a java:Location
             tripleCollector.addStatement(

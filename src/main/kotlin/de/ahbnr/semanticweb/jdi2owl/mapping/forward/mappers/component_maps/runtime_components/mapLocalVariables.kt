@@ -4,9 +4,13 @@ import com.sun.jdi.AbsentInformationException
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.MethodInfo
 
 fun mapLocalVariables(context: StackFrameContext) = with(context) {
-    val jdiMethod = frame.location().method()
-    val methodInfo = MethodInfo(jdiMethod, buildParameters)
-    val methodVariableDeclarations = methodInfo.variables
+    val methodInfo = run {
+        val jdiMethod = frame.location().method()
+        val declaringTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(jdiMethod.declaringType())
+
+        declaringTypeInfo.getMethodInfo(jdiMethod)
+    }
+    val methodVariableDeclarations = methodInfo.jdiMethod.variables()
 
     val variables = try {
         frame.visibleVariables()
@@ -19,12 +23,7 @@ fun mapLocalVariables(context: StackFrameContext) = with(context) {
         val values = frame.getValues(variables)
 
         for ((variable, value) in values) {
-            val variableInfo = methodVariableDeclarations.find { it.jdiLocalVariable == variable }
-
-            if (variableInfo == null) {
-                logger.error("Could not retrieve information on a variable declaration for a stack variable.")
-                continue
-            }
+            val variableInfo = methodInfo.getVariableInfo(variable)
 
             withVariableValueContext(value, variableInfo) {
                 mapLocalVariable(this)

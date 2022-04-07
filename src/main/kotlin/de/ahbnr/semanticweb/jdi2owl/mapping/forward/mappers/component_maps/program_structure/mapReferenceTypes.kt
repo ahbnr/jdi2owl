@@ -9,7 +9,7 @@ fun mapReferenceTypes(context: MappingContext) =
 
         for (referenceType in allReferenceTypes) {
             val typeInfo = buildParameters.typeInfoProvider.getTypeInfo(referenceType)
-            val typeIRI = IRIs.prog.genReferenceTypeURI(typeInfo)
+            val typeIRI = IRIs.prog.genReferenceTypeIRI(typeInfo)
 
             withCreatedTypeContext(typeInfo, typeIRI) {
                 when (typeInfo) {
