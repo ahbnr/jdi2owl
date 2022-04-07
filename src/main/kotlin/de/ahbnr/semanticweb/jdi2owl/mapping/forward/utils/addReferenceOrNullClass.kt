@@ -13,7 +13,7 @@ fun addReferenceOrNullClass(referenceTypeURI: String, tripleCollector: TripleCol
                 NodeFactory.createURI(referenceTypeURI),
 
                 tripleCollector.addConstruct(
-                    TripleCollector.BlankNodeConstruct.OWLOneOf.fromURIs(listOf(URIs.java.`null`))
+                    TripleCollector.BlankNodeConstruct.OWLOneOf.fromIRIs(listOf(URIs.java.`null`))
                 )
             )
         )

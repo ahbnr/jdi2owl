@@ -31,7 +31,7 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
 
         data class OWLOneOf(val objects: List<Node>) : BlankNodeConstruct() {
             companion object {
-                fun fromURIs(objects: List<String>) =
+                fun fromIRIs(objects: List<String>) =
                     OWLOneOf(objects.map { NodeFactory.createURI(it) })
             }
         }

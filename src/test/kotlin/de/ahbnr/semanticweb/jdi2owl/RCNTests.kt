@@ -28,6 +28,8 @@ import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import spoon.reflect.CtModel
 import java.io.File
+import java.nio.file.Files
+import kotlin.io.path.listDirectoryEntries
 
 class RCNTests {
     private var debugger: JvmDebugger? = null
@@ -122,13 +124,13 @@ class RCNTests {
             jvmState = jvmState!!,
             sourceModel = sourceModel,
             limiter = limiter,
-            typeInfoProvider = TypeInfoProvider(jvmState.pausedThread.virtualMachine())
+            typeInfoProvider = TypeInfoProvider(jvmState.pausedThread)
         )
 
         val ontology = graphGen!!.buildOntology(
             buildParameters,
             null,
-            LinterMode.Normal
+            LinterMode.NoLinters
         )
         assertNotNull(ontology)
 
@@ -143,63 +145,67 @@ class RCNTests {
         )
     }
 
-    @Test
-    fun `JDI type name parsing is correct`() {
-        val memberTypeSig = SignatureInfo.fromJdiTypeName("package.TopLevel\$MemberClass")
-
-        assertTrue( memberTypeSig.enclosedTypeKind is EnclosedTypeKind.NamedMemberClass )
-        assertEquals("MemberClass", (memberTypeSig.enclosedTypeKind as EnclosedTypeKind.NamedMemberClass).simpleName)
-
-        val anonymousClassSig = SignatureInfo.fromJdiTypeName("package.TopLevel\$1")
-
-        assertTrue( anonymousClassSig.enclosedTypeKind is EnclosedTypeKind.AnonymousClass )
-
-        val arrayTypeSig = SignatureInfo.fromJdiTypeName("package.TopLevel\$MemberClass[]")
-
-        assertTrue( memberTypeSig.enclosedTypeKind is EnclosedTypeKind.NamedMemberClass )
-        assertEquals("MemberClass", (memberTypeSig.enclosedTypeKind as EnclosedTypeKind.NamedMemberClass).simpleName)
+    private fun assertContainsType(rdfGraph: Model, typeNameRegex: Regex) {
+        assertTrue(
+            rdfGraph
+                .listResourcesWithProperty(rdfGraph.getProperty(ns.rdf + "type"), rdfGraph.getResource(ns.owl + "Class"))
+                .asSequence()
+                .any {
+                    it.isURIResource && it.uri.contains(typeNameRegex)
+                }
+        )
     }
 
     @Test
     fun `RCNs of top-level types are correct`() {
         val rdfGraph = inspectClass("TopLevelType", 11)
 
-        assertContainsType(rdfGraph, "RCNTests.TopLevelClass")
-        assertContainsType(rdfGraph, "RCNTests.TopLevelInterface")
+        assertContainsType(rdfGraph, "SysLoader~RCNTests.TopLevelClass")
+        assertContainsType(rdfGraph, "SysLoader~RCNTests.TopLevelInterface")
     }
 
     @Test
     fun `RCNs of member types are correct`() {
         val rdfGraph = inspectClass("MemberType", 17)
 
-        assertContainsType(rdfGraph, "RCNTests.MyClass.MemberClass")
-        assertContainsType(rdfGraph, "RCNTests.MyClass.MemberInterface")
-        assertContainsType(rdfGraph, "RCNTests.MyClass.StaticMemberClass")
+        assertContainsType(rdfGraph, "SysLoader~RCNTests.MyClass%24MemberClass")
+        assertContainsType(rdfGraph, "SysLoader~RCNTests.MyClass%24MemberInterface")
+        assertContainsType(rdfGraph, "SysLoader~RCNTests.MyClass%24StaticMemberClass")
     }
 
     @Test
     fun `RCNs of anonymous classes are correct`() {
         val rdfGraph = inspectClass("AnonymousType", 11)
 
-        assertTrue(rdfGraph.listSubjects().iterator().asSequence().any { it.isURIResource && it.uri.contains("RCNTests.MyClass.%3AAnon%3A") })
+        val anonClassRegex = Regex("SysLoader~RCNTests.MyClass%24\\d+$")
+        assertContainsType(rdfGraph, anonClassRegex)
     }
 
     @Test
     fun `RCNs of local classes are correct`() {
         val rdfGraph = inspectClass("LocalType", 15)
 
-        assertTrue(rdfGraph.listSubjects().iterator().asSequence().any { it.isURIResource && it.uri.contains("RCNTests.MyClass.LocalClass%3ALocal%3A") })
+        val localClassRegex = Regex("SysLoader~RCNTests.MyClass%24\\d+LocalClass$")
+        assertContainsType(rdfGraph, localClassRegex)
     }
 
     @Test
     fun `RCNs of array types are correct`() {
         val rdfGraph = inspectClass("ArrayType", 11)
+
+        assertContainsType(rdfGraph, "SysLoader~RCNTests.MyClass%24StaticMemberClass%5B%5D")
+    }
+
+    @Test
+    fun `RCNs of user-loaded types are correct`() {
+        val rdfGraph = inspectClass("UserLoadedType", 33)
         RDFWriter
             .create(rdfGraph)
             .lang(Lang.TURTLE)
             .format(RDFFormat.TURTLE_PRETTY)
             .output(File("datatest.ttl").outputStream())
 
-        assertContainsType(rdfGraph, "RCNTests.MyClass.StaticMemberClass[]")
+        assertContainsType(rdfGraph, "SysLoader~RCNTests.UserLoadedType")
+        assertContainsType(rdfGraph, Regex("Loader\\d+~RCNTests.UserLoadedType$"))
     }
 }

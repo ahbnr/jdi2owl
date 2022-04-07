@@ -2,6 +2,7 @@ package de.ahbnr.semanticweb.jdi2owl.mapping
 
 import com.sun.jdi.*
 import de.ahbnr.semanticweb.jdi2owl.debugging.utils.getFullyQualifiedName
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.FieldInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.LocalVariableInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.LocationInfo
@@ -120,7 +121,7 @@ class OntURIs(val ns: Namespaces) {
         val hasAccessModifier = ns.java + "hasAccessModifier"
         val AccessModifier = ns.java + "AccessModifier"
 
-        fun genPrimitiveTypeURI(type: PrimitiveType): String? = when (type) {
+        fun genPrimitiveTypeURI(type: TypeInfo.PrimitiveTypeInfo): String? = when (type.jdiType) {
             is BooleanType -> XSDDatatype.XSDboolean
             is ByteType -> XSDDatatype.XSDbyte
             is CharType -> XSDDatatype.XSDunsignedShort
@@ -139,8 +140,8 @@ class OntURIs(val ns: Namespaces) {
         val `java_lang_Object%5B%5D` = ns.prog + IRILib.encodeUriComponent("java.lang.Object[]")
         val java_lang_Object = ns.prog + IRILib.encodeUriComponent("java.lang.Object")
 
-        fun genVariableDeclarationURI(variable: LocalVariableInfo): String =
-            "${ns.prog}${IRILib.encodeUriComponent(getFullyQualifiedName(variable))}"
+        fun genVariableDeclarationURI(variableInfo: LocalVariableInfo): String =
+            "${ns.prog}${IRILib.encodeUriComponent(getFullyQualifiedName(variableInfo))}"
 
         fun genMethodURI(methodInfo: MethodInfo): String =
             "${ns.prog}${IRILib.encodeUriComponent(getFullyQualifiedName(methodInfo.jdiMethod))}"
@@ -149,27 +150,25 @@ class OntURIs(val ns: Namespaces) {
             return "${ns.prog}${IRILib.encodeUriComponent(referenceTypeInfo.rcn)}"
         }
 
-        fun genFieldURI(field: Field): String =
+        fun genFieldURI(fieldInfo: FieldInfo): String =
             "${ns.prog}${
-                IRILib.encodeUriComponent(
-                    getFullyQualifiedName(field)
-                )
+                IRILib.encodeUriComponent( fieldInfo.rcn )
             }"
 
         fun genLocationURI(locationInfo: LocationInfo): String =
             "${ns.prog}location_${IRILib.encodeUriComponent(locationInfo.id)}"
 
-        fun genTypedHasElementURI(componentTypeName: String): String =
-            "${ns.prog}hasElement${IRILib.encodeUriComponent("<${componentTypeName}>")}"
+        fun genTypedHasElementURI(componentTypeInfo: TypeInfo): String =
+            "${ns.prog}hasElement${IRILib.encodeUriComponent("<${componentTypeInfo.rcn}>")}"
 
-        fun genTypedSequenceElementURI(componentTypeName: String): String =
-            "${ns.prog}SequenceElement${IRILib.encodeUriComponent("<${componentTypeName}>")}"
+        fun genTypedSequenceElementURI(componentTypeInfo: TypeInfo): String =
+            "${ns.prog}SequenceElement${IRILib.encodeUriComponent("<${componentTypeInfo.rcn}>")}"
 
-        fun genTypedStoresPrimitiveURI(componentTypeName: String): String =
-            "${ns.prog}storesPrimitive${IRILib.encodeUriComponent("<${componentTypeName}>")}"
+        fun genTypedStoresPrimitiveURI(componentTypeInfo: TypeInfo.PrimitiveTypeInfo): String =
+            "${ns.prog}storesPrimitive${IRILib.encodeUriComponent("<${componentTypeInfo.rcn}>")}"
 
-        fun genTypedStoresReferenceURI(componentTypeName: String): String =
-            "${ns.prog}storesReference${IRILib.encodeUriComponent("<${componentTypeName}>")}"
+        fun genTypedStoresReferenceURI(componentTypeInfo: TypeInfo.ReferenceTypeInfo): String =
+            "${ns.prog}storesReference${IRILib.encodeUriComponent("<${componentTypeInfo.rcn}>")}"
     }
 
     val prog = ProgURIs()
