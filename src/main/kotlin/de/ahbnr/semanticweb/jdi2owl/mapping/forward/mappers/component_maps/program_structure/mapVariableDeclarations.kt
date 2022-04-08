@@ -117,7 +117,7 @@ fun mapVariableDeclaration(context: VariableDeclarationContext) {
             }
             is JavaType.UnloadedType -> {
                 val variableTypeInfo = buildParameters.typeInfoProvider.getNotYetLoadedTypeInfo(variableType.typeName)
-                val variableTypeIRI = IRIs.prog.genReferenceTypeIRI(typeInfo)
+                val variableTypeIRI = IRIs.prog.genReferenceTypeIRI(variableTypeInfo)
 
                 withNotYetLoadedTypeContext(variableTypeInfo, variableTypeIRI) {
                     mapNotYetLoadedType(this)
@@ -129,11 +129,10 @@ fun mapVariableDeclaration(context: VariableDeclarationContext) {
                     IRIs.owl.ObjectProperty
                 )
 
-                val notYetLoadedTypeInfo = buildParameters.typeInfoProvider.getNotYetLoadedTypeInfo(variableType.typeName)
                 tripleCollector.addStatement(
                     variableIRI,
                     IRIs.rdfs.range,
-                    IRIs.prog.genReferenceTypeIRI(notYetLoadedTypeInfo)
+                    variableTypeIRI
                 )
             }
         }

@@ -6,7 +6,6 @@ import com.github.owlcs.ontapi.OntManagers
 import com.github.owlcs.ontapi.Ontology
 import de.ahbnr.semanticweb.jdi2owl.linting.LinterMode
 import de.ahbnr.semanticweb.jdi2owl.linting.ModelSanityChecker
-import de.ahbnr.semanticweb.jdi2owl.mapping.Namespaces
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.macros.Chain
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.UniversalKnowledgeBaseParser
 import de.ahbnr.semanticweb.jdi2owl.Logger
@@ -30,6 +29,11 @@ class GraphGenerator(
     private val IRIs: OntURIs by inject()
 
     private val macros = arrayOf(Chain())
+
+    data class Result(
+        val ontology: Ontology?,
+        val noLints: Boolean
+    )
 
     private fun readIntoModel(fileName: String?, model: Model, inputStream: InputStream) {
         val reader = UniversalKnowledgeBaseParser(model, fileName, inputStream)
@@ -73,7 +77,7 @@ class GraphGenerator(
         buildParameters: BuildParameters,
         applicationDomainRulesPath: String?, /* turtle format file */
         linterMode: LinterMode
-    ): Ontology? {
+    ): Result {
         val ontManager = OntManagers.createManager()
         // Also search imports in current working directory
         ontManager.iriMappers.add(AutoIRIMapper(Path.of("").toFile(), false))
@@ -112,13 +116,13 @@ class GraphGenerator(
             }
         } catch (e: ParserException) {
             logger.error("Aborted model building due to fatal parser error.")
-            return null
+            return Result(null, false)
         }
 
         // Perform sanity checks and linting
         val checker = ModelSanityChecker()
-        checker.fullCheck(ontology, buildParameters.limiter, linterMode)
+        val noLints = checker.fullCheck(ontology, buildParameters.limiter, linterMode)
 
-        return ontology
+        return Result(ontology, noLints)
     }
 }

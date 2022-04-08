@@ -30,19 +30,19 @@ class ModelSanityChecker : KoinComponent {
     private val URIs: OntURIs by inject()
     private val logger: Logger by inject()
 
-    fun fullCheck(ontology: Ontology, mappingLimiter: MappingLimiter, linterMode: LinterMode) {
+    fun fullCheck(ontology: Ontology, mappingLimiter: MappingLimiter, linterMode: LinterMode): Boolean {
         if (linterMode == LinterMode.NoLinters)
-            return
+            return true
 
         val model = ontology.asGraphModel()
 
-        checkRdfTyping(model)
-        openllintOwlSyntaxChecks(model, mappingLimiter, linterMode == LinterMode.FullReport)
-        OWL2DLProfileViolationTest(ontology)
-        openllintOwlPatternChecks(ontology)
+        return checkRdfTyping(model) &&
+            openllintOwlSyntaxChecks(model, mappingLimiter, linterMode == LinterMode.FullReport) &&
+            OWL2DLProfileViolationTest(ontology) &&
+            openllintOwlPatternChecks(ontology)
     }
 
-    fun checkRdfTyping(model: Model) {
+    fun checkRdfTyping(model: Model): Boolean {
         val typeProperty = model.getProperty(URIs.rdf.type)
 
         var foundLint = false
@@ -66,12 +66,14 @@ class ModelSanityChecker : KoinComponent {
         if (foundLint)
             logger.log("")
 
+        return !foundLint
+
         // TODO: There is potentially a lot more sanity checks we can do
         //  (Typos, all the stuff that openllet.jena.graph.loader.DefaultGraphLoader is checking, ...)
     }
 
     // based on https://github.com/Galigator/openllet/blob/b7a07b60d2ae6a147415e30be0ffb72eff7fe857/tools-cli/src/main/java/openllet/Openllint.java#L280
-    fun openllintOwlSyntaxChecks(model: Model, limiter: MappingLimiter, fullLintingReport: Boolean) {
+    fun openllintOwlSyntaxChecks(model: Model, limiter: MappingLimiter, fullLintingReport: Boolean): Boolean {
         val checker = FilteredOwlSyntaxChecker(
             model,
             setOf(
@@ -90,10 +92,12 @@ class ModelSanityChecker : KoinComponent {
 
             logger.log("")
         }
+
+        return lints.isEmpty()
     }
 
     // based on https://github.com/Galigator/openllet/blob/b7a07b60d2ae6a147415e30be0ffb72eff7fe857/tools-cli/src/main/java/openllet/Openllint.java#L315
-    fun OWL2DLProfileViolationTest(ontology: OWLOntology) {
+    fun OWL2DLProfileViolationTest(ontology: OWLOntology): Boolean {
         val owl2Profile = Profiles.OWL2_DL
 
         // This linter is prone to throwing exceptions for the smallest anomalies in the input data
@@ -106,8 +110,9 @@ class ModelSanityChecker : KoinComponent {
             }
             logger.warning("Internal OWL2DL Profile linter error. This can indicate some anomaly in the input data.")
             logger.log("")
-            null
-        } ?: return
+
+            return false
+        }
 
         val violationRemovalFilters: List<(OWLProfileViolation) -> Boolean> = listOf(
             // Protege produces `owl:Class rdf:type owl:Class` axioms, which are unfortunately detected as use of
@@ -143,10 +148,12 @@ class ModelSanityChecker : KoinComponent {
             logger.error("Error: Openllint found OWL2 DL violations.")
             logger.log("")
         }
+
+        return violations.isEmpty()
     }
 
     // based on https://github.com/Galigator/openllet/blob/b7a07b60d2ae6a147415e30be0ffb72eff7fe857/tools-cli/src/main/java/openllet/Openllint.java#L315
-    fun openllintOwlPatternChecks(ontology: OWLOntology) {
+    fun openllintOwlPatternChecks(ontology: OWLOntology): Boolean {
         val patternLoader = LintPatternLoader()
         val ontologyLints = mutableMapOf<LintPattern, MutableList<Lint>>()
 
@@ -164,8 +171,9 @@ class ModelSanityChecker : KoinComponent {
                 }
                 logger.warning("Internal Openllint pattern checker error. This can indicate some anomaly in the input data.")
                 logger.log("")
-                null
-            } ?: return
+
+                return false
+            }
 
             for (pattern in patternLoader.axiomLintPatterns) {
                 val lint = pattern.match(ontology, axiom)
@@ -220,6 +228,8 @@ class ModelSanityChecker : KoinComponent {
             logger.warning("Warning: Openllint detected modeling constructs that have a negative effect on reasoning performance.")
             logger.log("")
         }
+
+        return ontologyLints.isEmpty()
 
         // FIXME: Also check imported ontologies
     }

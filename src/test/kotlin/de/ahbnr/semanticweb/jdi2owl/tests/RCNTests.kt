@@ -6,6 +6,8 @@ import org.apache.jena.rdf.model.Model
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 import spoon.testing.utils.Check
 
 class RCNTests: TestBase() {
@@ -26,18 +28,19 @@ class RCNTests: TestBase() {
     }
 
     private fun inspectClass(className: String, line: Int): Model {
-        val ontology = jdi2owl.inspectClass(
+        val result = jdi2owl.inspectClass(
             "RCNTests.$className",
             getTestSourceFile("de/ahbnr/semanticweb/jdi2owl/tests/RCNTests/$className.java"),
             line
         )
 
-        Check.assertNotNull(ontology)
+        Check.assertNotNull(result.ontology)
 
-        return ontology!!.asGraphModel()
+        return result.ontology!!.asGraphModel()
     }
 
     @Test
+    @Execution(ExecutionMode.CONCURRENT)
     fun `RCNs of top-level types are correct`() {
         val rdfGraph = inspectClass("TopLevelType", 11)
 
@@ -46,6 +49,7 @@ class RCNTests: TestBase() {
     }
 
     @Test
+    @Execution(ExecutionMode.CONCURRENT)
     fun `RCNs of member types are correct`() {
         val rdfGraph = inspectClass("MemberType", 17)
 
@@ -55,6 +59,7 @@ class RCNTests: TestBase() {
     }
 
     @Test
+    @Execution(ExecutionMode.CONCURRENT)
     fun `RCNs of anonymous classes are correct`() {
         val rdfGraph = inspectClass("AnonymousType", 11)
 
@@ -63,6 +68,7 @@ class RCNTests: TestBase() {
     }
 
     @Test
+    @Execution(ExecutionMode.CONCURRENT)
     fun `RCNs of local classes are correct`() {
         val rdfGraph = inspectClass("LocalType", 15)
 
@@ -71,6 +77,7 @@ class RCNTests: TestBase() {
     }
 
     @Test
+    @Execution(ExecutionMode.CONCURRENT)
     fun `RCNs of array types are correct`() {
         val rdfGraph = inspectClass("ArrayType", 11)
 
@@ -78,6 +85,7 @@ class RCNTests: TestBase() {
     }
 
     @Test
+    @Execution(ExecutionMode.CONCURRENT)
     fun `RCNs of user-loaded types are correct`() {
         val rdfGraph = inspectClass("UserLoadedType", 33)
 
@@ -86,6 +94,7 @@ class RCNTests: TestBase() {
     }
 
     @Test
+    @Execution(ExecutionMode.CONCURRENT)
     fun `RCNs of fields are correct`() {
         val rdfGraph = inspectClass("Fields", 13)
 
@@ -94,6 +103,7 @@ class RCNTests: TestBase() {
     }
 
     @Test
+    @Execution(ExecutionMode.CONCURRENT)
     fun `RCNs of methods are correct`() {
         val rdfGraph = inspectClass("Methods", 18)
 
@@ -104,6 +114,7 @@ class RCNTests: TestBase() {
     }
 
     @Test
+    @Execution(ExecutionMode.CONCURRENT)
     fun `RCNs of constructors are correct`() {
         val rdfGraph = inspectClass("Constructors", 13)
 
@@ -112,6 +123,7 @@ class RCNTests: TestBase() {
     }
 
     @Test
+    @Execution(ExecutionMode.CONCURRENT)
     fun `RCNs of variables are correct`() {
         val rdfGraph = inspectClass("Variables", 21)
 

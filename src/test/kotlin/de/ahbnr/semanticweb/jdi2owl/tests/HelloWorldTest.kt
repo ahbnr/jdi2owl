@@ -21,14 +21,14 @@ class HelloWorldTest: TestBase() {
         fun beforeAll() {
             jdi2owl = SimpleJDI2OWLApp()
 
-            val ontology = jdi2owl.inspectClass(
+            val result = jdi2owl.inspectClass(
                 "HelloWorld",
                 getTestSourceFile("de/ahbnr/semanticweb/jdi2owl/tests/HelloWorld.java"),
                 4
             )
 
-            Check.assertNotNull(ontology)
-            this.rdfGraph = ontology!!.asGraphModel()
+            Check.assertNotNull(result.ontology)
+            this.rdfGraph = result.ontology!!.asGraphModel()
         }
 
         @JvmStatic

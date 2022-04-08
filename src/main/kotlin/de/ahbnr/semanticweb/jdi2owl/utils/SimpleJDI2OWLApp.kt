@@ -24,6 +24,8 @@ class SimpleJDI2OWLApp: AutoCloseable {
     private val sourceModel: CtModel
     private val limiter: MappingLimiter
 
+    var linterMode: LinterMode = LinterMode.NoLinters
+
     init {
         // Setup dependency injection
         @Suppress("USELESS_CAST")
@@ -52,7 +54,7 @@ class SimpleJDI2OWLApp: AutoCloseable {
         stopKoin()
     }
 
-    fun inspectClass(className: String, filePath: Path, line: Int): Ontology? {
+    fun inspectClass(className: String, filePath: Path, line: Int): GraphGenerator.Result {
         // Prepare temporary directory for storing compiled classes
         val compilerTmpDir = kotlin.io.path.createTempDirectory()
 
@@ -70,7 +72,7 @@ class SimpleJDI2OWLApp: AutoCloseable {
         }
     }
 
-    fun inspectClass(className: String, classpaths: List<String>, line: Int): Ontology? {
+    fun inspectClass(className: String, classpaths: List<String>, line: Int): GraphGenerator.Result {
         return JvmDebugger().use { debugger ->
             val graphGen = GraphGenerator(
                 listOf(
@@ -87,7 +89,7 @@ class SimpleJDI2OWLApp: AutoCloseable {
             val jvmState = debugger.jvm?.state
                 ?: run {
                     logger.error("Program was not suspended. Can not obtain JVM state.")
-                    return null
+                    return GraphGenerator.Result(null, true)
                 }
 
             val buildParameters = BuildParameters(
@@ -97,13 +99,13 @@ class SimpleJDI2OWLApp: AutoCloseable {
                 typeInfoProvider = TypeInfoProvider(jvmState.pausedThread)
             )
 
-            val ontology = graphGen.buildOntology(
+            val result = graphGen.buildOntology(
                 buildParameters,
                 null,
-                LinterMode.NoLinters
+                linterMode
             )
 
-            ontology
+            result
         }
     }
 }

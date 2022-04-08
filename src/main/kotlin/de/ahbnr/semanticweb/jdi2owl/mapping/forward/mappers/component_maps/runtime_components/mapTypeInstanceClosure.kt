@@ -18,14 +18,26 @@ fun mapTypeInstanceClosure(context: ObjectMappingContext) = with(context) {
                     .filter { it.referenceType() == referenceType }
                     .map { IRIs.run.genObjectURI(it) }
 
-                // If so, declare each type equivalent to a nominal containing all its instances
-                tripleCollector.addStatement(
-                    typeIRI,
-                    IRIs.owl.equivalentClass,
-                    tripleCollector.addConstruct(
-                        TripleCollector.BlankNodeConstruct.OWLOneOf.fromIRIs(instanceIRIs)
+                // If there are instances, we declare the type equivalent to a nominal containing all its instances
+                if (instanceIRIs.isNotEmpty()) {
+                    tripleCollector.addStatement(
+                        typeIRI,
+                        IRIs.owl.equivalentClass,
+                        tripleCollector.addConstruct(
+                            TripleCollector.BlankNodeConstruct.OWLOneOf.fromIRIs(instanceIRIs)
+                        )
                     )
-                )
+                }
+
+                else {
+                    // Otherwise, we declare the type to be subsumed by owl:Nothing.
+                    // This is because empty OneOf nominals are not supported
+                    tripleCollector.addStatement(
+                        typeIRI,
+                        IRIs.rdfs.subClassOf,
+                        IRIs.owl.Nothing
+                    )
+                }
             }
         }
     }
