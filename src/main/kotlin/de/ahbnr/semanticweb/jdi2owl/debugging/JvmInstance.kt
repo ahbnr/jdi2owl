@@ -7,8 +7,10 @@ import com.sun.jdi.ReferenceType
 import com.sun.jdi.VMDisconnectedException
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.event.BreakpointEvent
-import com.sun.jdi.event.EventSet
+import com.sun.jdi.event.VMDeathEvent
 import com.sun.jdi.event.VMDisconnectEvent
+import com.sun.jdi.event.VMStartEvent
+import com.sun.jdi.request.EventRequest
 import de.ahbnr.semanticweb.jdi2owl.Logger
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -35,7 +37,11 @@ class JvmInstance(
         }
     }
 
+    private val eventCollector = JvmEventCollector(vm)
+
     init {
+        eventCollector.start()
+
         redirectStream(process.inputStream, logger.logStream())
         redirectStream(process.errorStream, logger.errorStream())
 
@@ -65,6 +71,7 @@ class JvmInstance(
         }
 
         val bpReq = vm.eventRequestManager().createBreakpointRequest(location)
+        bpReq.setSuspendPolicy(EventRequest.SUSPEND_ALL)
         bpReq.enable()
 
         logger.log("Set breakpoint at $location.")
@@ -82,55 +89,101 @@ class JvmInstance(
         state = null
         vm.resume()
 
-        // FIXME: Properly handle class loading: https://dzone.com/articles/monitoring-classloading-jdi
-
-        var eventSet: EventSet? = null
         var paused = false
-        while (!paused && vm.eventQueue().remove().also { eventSet = it } != null) {
+        while (!paused) {
             assertConnected()
-
-            for (event in eventSet!!) {
-                when (event) {
-                    is BreakpointEvent -> {
-                        state = JvmState(event.thread(), event.location())
-                        paused = true
+            val collected = eventCollector.take()
+            when (collected) {
+                is JvmEventCollector.CollectedEvent.Just -> {
+                    val event = collected.event
+                    when (event) {
+                        is BreakpointEvent -> {
+                            state = JvmState(event.thread(), event.location())
+                            paused = true
+                        }
+                        is VMDisconnectEvent -> {
+                            paused = true
+                            close()
+                        }
                     }
-                    is VMDisconnectEvent -> {
-                        paused = true
-                        close()
+
+                    val handlerResult = eventHandler.handleEvent(this, event)
+                    when (handlerResult) {
+                        is HandleEventResult.ForceResume -> paused = false
+                    }
+
+                    if (!paused) {
+                        vm.resume()
                     }
                 }
 
-                val handlerResult = eventHandler.handleEvent(this, event)
-                when (handlerResult) {
-                    is HandleEventResult.ForceResume -> paused = false
+                is JvmEventCollector.CollectedEvent.Exception ->
+                    throw collected.e
+
+                is JvmEventCollector.CollectedEvent.Disconnected ->
+                    throw VMDisconnectedException()
+            }
+        }
+    }
+
+    /**
+     * Call immediately after launching new JVM.
+     * It will make sure at least VMStartEvent has occurred before returning
+     *
+     * Returns false iff the VM did not start properly.
+     */
+    fun waitUntilStarted(): Boolean {
+        while (true) {
+            val collected = eventCollector.take()
+            when (collected) {
+                is JvmEventCollector.CollectedEvent.Just -> {
+                    val event = collected.event
+                    when (event) {
+                        is VMStartEvent -> {
+                            logger.debug("JVM started.")
+                            return true
+                        }
+                        is VMDeathEvent -> {
+                            logger.error("JVM terminated prematurely!")
+                            return false
+                        }
+                        is VMDisconnectEvent -> {
+                            logger.error("JVM disconnected prematurely!")
+                            return false
+                        }
+                    }
                 }
 
-                if (!paused) {
-                    vm.resume()
+                is JvmEventCollector.CollectedEvent.Exception ->
+                    throw collected.e
+
+                is JvmEventCollector.CollectedEvent.Disconnected -> {
+                    logger.error("JVM disconnected prematurely!")
+                    return false
                 }
             }
         }
-
-        // FIXME: This blocks!
-        // for (line in outputCollector.seq) {
-        //     logger.log(line)
-        // }
     }
 
     override fun close() {
-        assertConnected()
-
         try {
-            // We probably shouldnt kill the VM. What if it is an external VM we connected to?
-            // vm.resume()
-            // vm.dispose()
+            assertConnected()
 
-            vm.exit(-1)
-        } catch (e: VMDisconnectedException) {
-            // can happen if VM crashed internally, so we can ignore this.
-        } finally {
-            process.destroy()
+            try {
+                // We probably shouldnt kill the VM. What if it is an external VM we connected to?
+                // vm.resume()
+                // vm.dispose()
+
+                vm.exit(-1)
+            } catch (e: VMDisconnectedException) {
+                // can happen if VM crashed internally, so we can ignore this.
+            } finally {
+                process.destroy()
+            }
+        }
+
+        finally {
+            eventCollector.close()
         }
     }
 }

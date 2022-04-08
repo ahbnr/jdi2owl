@@ -4,8 +4,10 @@ package de.ahbnr.semanticweb.jdi2owl.debugging
 
 import com.sun.jdi.Bootstrap
 import com.sun.jdi.ReferenceType
+import com.sun.jdi.VirtualMachine
 import com.sun.jdi.event.*
 import com.sun.jdi.request.BreakpointRequest
+import com.sun.jdi.request.EventRequest
 import de.ahbnr.semanticweb.jdi2owl.Logger
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -49,12 +51,34 @@ class JvmDebugger : Closeable, KoinComponent {
 
             val rawVM = jvm?.vm
             if (rawVM != null) {
-                val prepareReq = rawVM.eventRequestManager().createClassPrepareRequest()
-                prepareReq.addClassFilter(className)
-                prepareReq.enable()
+                waitForClassPrepare(rawVM, className)
             }
 
             logger.log("Deferred setting the breakpoint until the class in question is loaded.")
+        }
+    }
+
+    private fun waitForClassPrepare(rawVM: VirtualMachine, className: String) {
+        val prepareReq = rawVM.eventRequestManager().createClassPrepareRequest()
+        prepareReq.setSuspendPolicy(EventRequest.SUSPEND_ALL)
+        prepareReq.addClassFilter(className)
+        prepareReq.addCountFilter(1)
+        prepareReq.enable()
+    }
+
+    private fun installBreakpointsInNewVM(jvm: JvmInstance) {
+        val classesWithDeferredBreakpoints = deferredBreakpoints.keys.toList()
+        for (classWithBreakpoints in classesWithDeferredBreakpoints) {
+            val preparedClasses = jvm.vm.classesByName(classWithBreakpoints)
+            if (preparedClasses.isEmpty()) {
+                waitForClassPrepare(jvm.vm, classWithBreakpoints)
+            }
+
+            else {
+                for (loadedClass in preparedClasses) {
+                    tryApplyingDeferredBreakpoints(jvm, loadedClass)
+                }
+            }
         }
     }
 
@@ -74,11 +98,6 @@ class JvmDebugger : Closeable, KoinComponent {
     private val eventHandler = object : IJvmEventHandler {
         override fun handleEvent(jvm: JvmInstance, event: Event): HandleEventResult =
             when (event) {
-                is VMStartEvent -> {
-                    logger.log("JVM started.")
-                    HandleEventResult.Nothing
-                }
-
                 is ClassPrepareEvent -> {
                     tryApplyingDeferredBreakpoints(jvm, event.referenceType())
                     HandleEventResult.Nothing
@@ -137,20 +156,28 @@ class JvmDebugger : Closeable, KoinComponent {
         val arguments = launchingConnector.defaultArguments()
         arguments["main"]!!.setValue(mainClassAndArgs)
 
-        arguments["options"]!!.setValue(classpaths.joinToString(" ") { "-cp $it" })
+        arguments["options"]!!.setValue( classpaths.joinToString(" ") { "-cp $it" } )
 
-        val rawVM = launchingConnector.launch(arguments)
-
-        for (breakpointClass in deferredBreakpoints.keys) {
-            val req = rawVM.eventRequestManager().createClassPrepareRequest()
-            req.addClassFilter(breakpointClass)
-            req.enable()
-        }
-
-        jvm = JvmInstance(
-            rawVM,
+        JvmInstance(
+            launchingConnector.launch(arguments),
             eventHandler
-        )
+        ).let { jvm ->
+            try {
+                if(!jvm.waitUntilStarted()) {
+                    logger.log("Could not start JVM.")
+                    return
+                }
+
+                installBreakpointsInNewVM(jvm)
+            }
+
+            catch (e: Exception) {
+                jvm.close()
+                throw e
+            }
+
+            this.jvm = jvm
+        }
     }
 
     fun kill() {
