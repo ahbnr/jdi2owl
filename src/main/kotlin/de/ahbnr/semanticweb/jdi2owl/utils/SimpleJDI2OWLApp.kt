@@ -1,6 +1,5 @@
 package de.ahbnr.semanticweb.jdi2owl.utils
 
-import com.github.owlcs.ontapi.Ontology
 import de.ahbnr.semanticweb.jdi2owl.BasicLogger
 import de.ahbnr.semanticweb.jdi2owl.Logger
 import de.ahbnr.semanticweb.jdi2owl.debugging.JvmDebugger

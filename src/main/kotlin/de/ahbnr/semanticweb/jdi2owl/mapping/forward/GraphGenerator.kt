@@ -35,29 +35,26 @@ class GraphGenerator(
         val noLints: Boolean
     )
 
-    private fun readIntoModel(fileName: String?, model: Model, inputStream: InputStream) {
-        val reader = UniversalKnowledgeBaseParser(model, fileName, inputStream)
+    private fun readIntoModel(fileName: String?, model: Model, inputStreamProducer: () -> InputStream) {
+        val reader = UniversalKnowledgeBaseParser(model, fileName, inputStreamProducer)
         reader.readIntoModel()
     }
 
     private fun loadJavaOntology(model: Model) {
         val resourcePath = "/de/ahbnr/semanticweb/jdi2owl/ontologies/java.ttl"
-        val inputStream = javaClass.getResourceAsStream(resourcePath)
+        val inputStreamProducer = { javaClass.getResourceAsStream(resourcePath)!! }
 
-        readIntoModel(resourcePath, model, inputStream!!)
+        readIntoModel(resourcePath, model, inputStreamProducer)
     }
 
     private fun loadMacrosOntology(model: Model) {
         val resourcePath = "/de/ahbnr/semanticweb/jdi2owl/ontologies/macros.ttl"
-        val inputStream = javaClass.getResourceAsStream(resourcePath)
+        val inputStreamProducer = { javaClass.getResourceAsStream(resourcePath)!! }
 
-        readIntoModel(resourcePath, model, inputStream!!)
+        readIntoModel(resourcePath, model, inputStreamProducer)
     }
 
     private fun mapProgramState(buildParameters: BuildParameters, model: Model) {
-        model.setNsPrefix("run", IRIs.ns.run)
-        model.setNsPrefix("local", IRIs.ns.local)
-
         for (mapper in mappers) {
             mapper.extendModel(buildParameters, model)
         }
@@ -68,8 +65,8 @@ class GraphGenerator(
         model: Model
     ) {
         if (applicationDomainRulesPath != null) {
-            val fileStream = FileInputStream(File(applicationDomainRulesPath))
-            readIntoModel(applicationDomainRulesPath, model, fileStream)
+            val fileStreamProducer = { FileInputStream(File(applicationDomainRulesPath)) }
+            readIntoModel(applicationDomainRulesPath, model, fileStreamProducer)
         }
     }
 
@@ -87,6 +84,10 @@ class GraphGenerator(
         val model: Model = ontology.asGraphModel()
 
         try {
+            // Declare dynamically generated prefixes
+            model.setNsPrefix("run", IRIs.ns.run)
+            model.setNsPrefix("local", IRIs.ns.local)
+
             // Load Java ontology
             loadJavaOntology(model)
 

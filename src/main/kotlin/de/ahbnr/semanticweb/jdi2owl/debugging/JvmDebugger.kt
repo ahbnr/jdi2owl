@@ -129,7 +129,7 @@ class JvmDebugger : Closeable, KoinComponent {
                 }
 
                 is VMDisconnectEvent -> {
-                    logger.log("The JVM terminated.")
+                    logger.debug("The JVM terminated.")
                     this@JvmDebugger.jvm = null
 
                     HandleEventResult.Nothing

@@ -2,13 +2,14 @@ package de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils
 
 import com.github.owlcs.ontapi.OntManagers
 import de.ahbnr.semanticweb.jdi2owl.Logger
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.ParserException
+import org.apache.jena.atlas.json.JsonParseException
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.ModelFactory
 import org.apache.jena.riot.Lang
 import org.apache.jena.riot.RDFParser
 import org.apache.jena.riot.RiotException
 import org.apache.jena.riot.system.ErrorHandler
+import org.apache.jena.shacl.compact.reader.ShaclcParseException
 import org.apache.jena.util.FileUtils
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -19,28 +20,28 @@ import java.io.InputStream
 class UniversalKnowledgeBaseParser(
     val model: Model,
     val fileName: String?,
-    val inputStream: InputStream
+    val inputStreamProducer: () -> InputStream
 ) : KoinComponent {
     private val logger: Logger by inject()
 
     private fun readWithJena(lang: Lang): Boolean {
+        fun makeLogString(message: String, line: Long, col: Long): String =
+            "At $line:$col: $message"
+
         try {
             val parsingModel = ModelFactory.createDefaultModel()
 
             RDFParser
-                .source(inputStream)
+                .source(inputStreamProducer())
                 .lang(lang)
                 .errorHandler(object : ErrorHandler {
-                    private fun makeLogString(message: String, line: Long, col: Long): String =
-                        "At $line:$col: $message"
-
                     override fun error(message: String, line: Long, col: Long) {
                         logger.error("Parser Error. ${makeLogString(message, line, col)}")
                     }
 
                     override fun fatal(message: String, line: Long, col: Long) {
                         logger.error("FATAL Parser Error. ${makeLogString(message, line, col)}")
-                        throw ParserException()
+                        throw RiotException(message)
                     }
 
                     override fun warning(message: String, line: Long, col: Long) {
@@ -55,7 +56,12 @@ class UniversalKnowledgeBaseParser(
 
             return true
         } catch (e: RiotException) {
-        } catch (e: ParserException) {
+        }
+        catch (e: JsonParseException) {
+            logger.error("FATAL Parser Error. ${makeLogString(e.message ?: "Unknown reason.", e.line.toLong(), e.column.toLong())}")
+        }
+        catch (e: ShaclcParseException) {
+            logger.error("FATAL Parser Error. ${makeLogString(e.message ?: "Unknown reason.", e.line.toLong(), e.column.toLong())}")
         }
 
         return false
@@ -69,7 +75,7 @@ class UniversalKnowledgeBaseParser(
         return try {
             // If Jena parsers fail, try OWLAPI parsers, since the file might be in functional syntax or manchester
             // syntax
-            val loadedOntology = loadingManager.loadOntologyFromOntologyDocument(inputStream)
+            val loadedOntology = loadingManager.loadOntologyFromOntologyDocument(inputStreamProducer())
 
             model.add(loadedOntology.asGraphModel())
             true
@@ -127,6 +133,7 @@ class UniversalKnowledgeBaseParser(
         )
 
         for (lang in langsToTry) {
+            logger.debug("Fallback: Trying Jena $lang parser...")
             if (readWithJena(lang)) return
         }
 
