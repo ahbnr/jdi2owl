@@ -9,17 +9,13 @@ fun mapClass(context: ClassContext) {
         if (buildParameters.limiter.canReferenceTypeBeSkipped(typeInfo.jdiType))
             return
 
-        // This, as an individual, is a Java Class
         tripleCollector.addStatement(
-            typeIRI,
-            IRIs.rdf.type,
-            IRIs.java.Class
+            // this type is a Java class
+            typeIRI, IRIs.rdf.type, IRIs.java.Class
         )
 
         // But we use Punning, and it is also an OWL class
-        // More specifically, all its individuals are also part of the superclass
-        //
-        // (btw. prog:java.lang.Object is defined as an OWL class in the base ontology)
+        // All its individuals are also part of the superclass
         val superClass: ClassType? = typeInfo.jdiType.superclass()
         if (superClass != null && !buildParameters.limiter.canReferenceTypeBeSkipped(superClass)) {
             val superClassInfo = buildParameters.typeInfoProvider.getTypeInfo(superClass)
@@ -29,14 +25,9 @@ fun mapClass(context: ClassContext) {
                 IRIs.rdfs.subClassOf,
                 IRIs.prog.genReferenceTypeIRI(superClassInfo)
             )
-        } else if (typeInfo.jdiType.name() != "java.lang.Object") {
-            tripleCollector.addStatement(
-                typeIRI,
-                IRIs.rdfs.subClassOf,
-                IRIs.prog.java_lang_Object
-            )
-        }
+        } // We do not need to handle the case, that there is no superclass. The JLS/JDI allows this only for Object
 
+        // We must handle superinterfaces similarly
         // https://docs.oracle.com/javase/specs/jls/se11/html/jls-4.html#jls-4.10.2
         val superInterfaces =
             typeInfo.jdiType.interfaces().filterNot { buildParameters.limiter.canReferenceTypeBeSkipped(it) }
@@ -49,14 +40,6 @@ fun mapClass(context: ClassContext) {
                 IRIs.prog.genReferenceTypeIRI(superInterfaceInfo)
             )
         }
-
-        // FIXME: why do Kamburjan et. al. use subClassOf and prog:Object here?
-        //  Also: Classes are also objects in Java. However, I moved this to the object mapper
-        // tripleCollector.addStatement(
-        //     classSubject,
-        //     URIs.rdfs.subClassOf,
-        //     URIs.prog.Object
-        // )
 
         // Define accessibility
         tripleCollector.addStatement(
