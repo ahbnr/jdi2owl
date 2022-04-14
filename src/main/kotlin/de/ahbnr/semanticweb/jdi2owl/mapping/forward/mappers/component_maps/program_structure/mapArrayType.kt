@@ -7,11 +7,9 @@ import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.JavaType
 
 fun mapArrayType(context: ArrayTypeContext) = with(context) {
-    // this, as an individual, is an array:
     tripleCollector.addStatement(
-        typeIRI,
-        IRIs.rdf.type,
-        IRIs.java.Array
+        // this, as an individual, is an array:
+        typeIRI, IRIs.rdf.type, IRIs.java.Array
     )
 
     // Now we need to clarify the type of the array elements

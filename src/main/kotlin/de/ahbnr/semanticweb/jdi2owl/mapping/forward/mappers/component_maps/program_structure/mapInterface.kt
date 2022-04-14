@@ -3,35 +3,31 @@ package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.prog
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
 
 fun mapInterface(context: InterfaceContext) = with(context) {
-    // This, as an individual, is a Java Interface
-    tripleCollector.addStatement(
-        typeIRI,
-        IRIs.rdf.type,
-        IRIs.java.Interface
-    )
+    with(IRIs) {
+        tripleCollector.dsl {
+            typeIRI {
+                // This, as an individual, is a Java Interface
+                rdf.type of java.Interface
+
+                // java.lang.Object is a supertype of all interfaces
+                // https://docs.oracle.com/javase/specs/jls/se11/html/jls-4.html#jls-4.10.2
+                rdfs.subClassOf of prog.java_lang_Object
+            }
+        }
+    }
 
     val superInterfaces = typeInfo.jdiType.superinterfaces().filterNot {
         buildParameters.limiter.canReferenceTypeBeSkipped(it)
     }
 
-    if (superInterfaces.isEmpty()) {
-        // If an interface has no direct superinterface, then its java.lang.Object is a direct supertype
-        // https://docs.oracle.com/javase/specs/jls/se11/html/jls-4.html#jls-4.10.2
+    for (superInterface in superInterfaces) {
+        val superInterfaceInfo = buildParameters.typeInfoProvider.getTypeInfo(superInterface)
+
         tripleCollector.addStatement(
             typeIRI,
             IRIs.rdfs.subClassOf,
-            IRIs.prog.java_lang_Object
+            IRIs.prog.genReferenceTypeIRI(superInterfaceInfo)
         )
-    } else {
-        for (superInterface in superInterfaces) {
-            val superInterfaceInfo = buildParameters.typeInfoProvider.getTypeInfo(superInterface)
-
-            tripleCollector.addStatement(
-                typeIRI,
-                IRIs.rdfs.subClassOf,
-                IRIs.prog.genReferenceTypeIRI(superInterfaceInfo)
-            )
-        }
     }
 }
 
