@@ -292,6 +292,10 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
         }
     }
 
+    fun dsl(block: TripleCollectorDSL.() -> Unit) {
+        TripleCollectorDSL(this).block()
+    }
+
     private fun genList(root: Node, first: Node, rest: List<Node>): Sequence<Triple> = sequence {
         yield(Triple(root, NodeFactory.createURI(URIs.rdf.type), NodeFactory.createURI(URIs.rdf.List)))
         yield(Triple(root, NodeFactory.createURI(URIs.rdf.first), first))
