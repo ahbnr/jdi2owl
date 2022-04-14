@@ -18,6 +18,9 @@ fun mapReferenceTypes(context: MappingContext) = with(context) {
 }
 
 fun mapReferenceType(context: CreatedTypeContext) = with(context) {
+    if (buildParameters.limiter.canReferenceTypeBeSkipped(typeInfo.jdiType))
+        return
+
     with(IRIs) {
         tripleCollector.dsl {
             typeIRI {
