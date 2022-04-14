@@ -9,18 +9,6 @@ fun mapClass(context: ClassContext) {
         if (buildParameters.limiter.canReferenceTypeBeSkipped(typeInfo.jdiType))
             return
 
-        // classSubject is an owl class
-        // FIXME: Shouldnt this be implied by being a subClassOf java.lang.Object?
-        //   either it is not, or some reasoners / frameworks do not recognize this implication because some
-        //   things dont work when this is removed.
-        //   For example: The SyntacticLocalityModuleExtractor does not extract OWL class definitions for
-        //   the java classes.
-        tripleCollector.addStatement(
-            typeIRI,
-            IRIs.rdf.type,
-            IRIs.owl.Class
-        )
-
         // This, as an individual, is a Java Class
         tripleCollector.addStatement(
             typeIRI,
@@ -79,9 +67,6 @@ fun mapClass(context: ClassContext) {
                 .fromJdiAccessible(typeInfo.jdiType)
                 .toNode()
         )
-
-        mapMethods(this)
-        mapFields(this)
     }
 }
 

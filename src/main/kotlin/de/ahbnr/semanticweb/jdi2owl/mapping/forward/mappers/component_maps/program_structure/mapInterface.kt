@@ -7,12 +7,6 @@ fun mapInterface(context: InterfaceContext) {
         if (buildParameters.limiter.canReferenceTypeBeSkipped(typeInfo.jdiType))
             return
 
-        tripleCollector.addStatement(
-            typeIRI,
-            IRIs.rdf.type,
-            IRIs.owl.Class
-        )
-
         // This, as an individual, is a Java Interface
         tripleCollector.addStatement(
             typeIRI,
@@ -43,8 +37,6 @@ fun mapInterface(context: InterfaceContext) {
                 )
             }
         }
-
-        mapMethods(this)
     }
 }
 

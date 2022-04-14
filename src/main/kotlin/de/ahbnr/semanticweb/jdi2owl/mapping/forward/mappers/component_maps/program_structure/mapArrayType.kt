@@ -11,12 +11,6 @@ fun mapArrayType(context: ArrayTypeContext) {
         if (buildParameters.limiter.canReferenceTypeBeSkipped(typeInfo.jdiType))
             return
 
-        tripleCollector.addStatement(
-            typeIRI,
-            IRIs.rdf.type,
-            IRIs.owl.Class
-        )
-
         // this, as an individual, is an array:
         tripleCollector.addStatement(
             typeIRI,
