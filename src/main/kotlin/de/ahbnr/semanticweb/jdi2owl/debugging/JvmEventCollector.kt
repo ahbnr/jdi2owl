@@ -39,7 +39,13 @@ class JvmEventCollector(
         }
 
         catch (_: InterruptedException) { }
-        catch (_: VMDisconnectedException) { queue.put(CollectedEvent.Disconnected) }
+        catch (_: VMDisconnectedException) {
+            try {
+                queue.put(CollectedEvent.Disconnected)
+            }
+
+            catch (_: InterruptedException) {}
+        }
         catch (e: Exception) {
             queue.put(CollectedEvent.Exception(e))
         }
