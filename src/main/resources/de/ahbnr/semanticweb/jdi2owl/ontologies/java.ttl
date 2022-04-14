@@ -150,6 +150,19 @@ java:hasJDWPObjectId rdf:type owl:DatatypeProperty ,
                      rdfs:range xsd:long .
 
 
+###  https://github.com/ahbnr/SemanticJavaDebugger/Java#hasName
+java:hasName rdf:type owl:DatatypeProperty ,
+                      owl:FunctionalProperty ;
+             rdfs:domain [ rdf:type owl:Class ;
+                           owl:unionOf ( java:Class
+                                         java:Interface
+                                         java:UnloadedType
+                                         java:VariableDeclaration
+                                       )
+                         ] ;
+             rdfs:range xsd:string .
+
+
 ###  https://github.com/ahbnr/SemanticJavaDebugger/Java#hasPlainValue
 java:hasPlainValue rdf:type owl:DatatypeProperty ,
                             owl:FunctionalProperty ;

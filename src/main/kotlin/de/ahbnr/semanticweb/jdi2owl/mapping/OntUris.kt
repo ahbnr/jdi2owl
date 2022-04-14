@@ -77,6 +77,8 @@ class OntURIs(val ns: Namespaces) {
         val Method = ns.java + "Method"
         val Field = ns.java + "Field"
 
+        val hasName = ns.java + "hasName"
+
         val Interface = ns.java + "Interface"
 
         val Array = ns.java + "Array"
