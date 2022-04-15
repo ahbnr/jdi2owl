@@ -1,5 +1,6 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.program_structure
 
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.mapJavaNameToLiteral
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.contexts.MappingContext
 
@@ -13,28 +14,20 @@ fun mapNotYetLoadedType(context: NotYetLoadedTypeContext): Unit = with(context) 
     if (buildParameters.limiter.canReferenceTypeBeSkipped(typeInfo.binaryName))
         return
 
-    // TODO: Check if we already added a triple for this unloaded type
-    tripleCollector.addStatement(
-        typeIRI,
-        IRIs.rdf.type,
-        IRIs.java.UnloadedType
-    )
+    with(IRIs) {
+        tripleCollector.dsl {
+            typeIRI {
+                rdf.type of owl.NamedIndividual
+                rdf.type of java.UnloadedType
+                java.hasName of mapJavaNameToLiteral(typeInfo.binaryName)
 
-    // it is also an owl class
-    // TODO: Why? Check model
-    tripleCollector.addStatement(
-        typeIRI,
-        IRIs.rdf.type,
-        IRIs.owl.Class
-    )
-
-    // all unloaded types must be reference types
-    // and thus inherit from java.lang.Object
-    tripleCollector.addStatement(
-        typeIRI,
-        IRIs.rdfs.subClassOf,
-        IRIs.prog.java_lang_Object
-    )
+                // all unloaded types must be reference types
+                // and thus inherit from java.lang.Object
+                rdf.type of owl.Class
+                rdfs.subClassOf of prog.java_lang_Object
+            }
+        }
+    }
 }
 
 interface NotYetLoadedTypeContext: RefTypeContext {
