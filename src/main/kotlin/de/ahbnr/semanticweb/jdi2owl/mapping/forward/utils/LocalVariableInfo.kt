@@ -1,9 +1,11 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils
 
+import com.sun.jdi.ClassNotLoadedException
 import com.sun.jdi.LocalVariable
 import de.ahbnr.semanticweb.jdi2owl.debugging.utils.InternalJDIUtils
 
 data class LocalVariableInfo(
+    private val typeInfoProvider: TypeInfoProvider,
     val jdiLocalVariable: LocalVariable,
     val methodInfo: MethodInfo
 ): HasRCN {
@@ -25,6 +27,15 @@ data class LocalVariableInfo(
     }
 
     override val rcn: String = "${methodInfo.rcn}.$localName"
+
+    val typeInfo: TypeInfo
+        get() = try {
+                typeInfoProvider.getTypeInfo(jdiLocalVariable.type())
+            }
+
+            catch (e: ClassNotLoadedException) {
+                typeInfoProvider.getNotYetLoadedTypeInfo(jdiLocalVariable.typeName())
+            }
 
     fun getLine(): Int? {
         val jdiInfo = InternalJDIUtils.getScopeStart(jdiLocalVariable).lineNumber()

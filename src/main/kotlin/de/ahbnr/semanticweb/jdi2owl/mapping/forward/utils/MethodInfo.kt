@@ -80,7 +80,7 @@ class MethodInfo(
         }
 
     fun getVariableInfo(jdiVariable: LocalVariable) =
-        LocalVariableInfo(jdiVariable, this)
+        LocalVariableInfo(typeInfoProvider, jdiVariable, this)
 
     private val jdiVariables: List<LocalVariable> by lazy {
         (if (!jdiMethod.isAbstract && !jdiMethod.isNative)

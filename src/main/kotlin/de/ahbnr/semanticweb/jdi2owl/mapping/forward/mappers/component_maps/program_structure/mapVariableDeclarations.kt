@@ -2,6 +2,7 @@ package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.prog
 
 import com.sun.jdi.AbsentInformationException
 import com.sun.jdi.ClassNotLoadedException
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.mapJavaNameToLiteral
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.utils.addReferenceOrNullClass
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.JavaType
@@ -29,127 +30,74 @@ fun mapVariableDeclarations(context: MethodContext) {
     }
 }
 
-fun mapVariableDeclaration(context: VariableDeclarationContext) {
-    context.apply {
-        // TODO: Include scope information?
+fun mapVariableDeclaration(context: VariableDeclarationContext) = with(context) {
+    // TODO: Include scope information?
 
-        // it *is* a VariableDeclaration
-        tripleCollector.addStatement(
-            variableIRI,
-            IRIs.rdf.type,
-            IRIs.java.VariableDeclaration
-        )
+    // A variable declaration is modeled as a property that relates StackFrames and the variable values.
+    // This allows to encode the typing of the variable into the property range.
 
-        // ...and it is declared by the surrounding method
-        tripleCollector.addStatement(
-            methodIRI,
-            IRIs.java.declaresVariable,
-            variableIRI
-        )
+    with(IRIs) {
+        tripleCollector.dsl {
+            variableIRI {
+                // declare variable as individual that is a variable
+                rdf.type of owl.NamedIndividual
+                rdf.type of java.VariableDeclaration
+                rdf.type of owl.FunctionalProperty
+                rdfs.domain of java.StackFrame
 
-        // ...and it is declared at this line:
-        val line = variableInfo.getLine()
-        if (line != null) {
-            tripleCollector.addStatement(
-                variableIRI,
-                IRIs.java.isAtLine,
-                NodeFactory.createLiteralByValue(line, XSDDatatype.XSDint)
-            )
+                java.hasName of mapJavaNameToLiteral(variableInfo.localName)
+            }
+
+            methodIRI {
+                // the variable is declared by the surrounding method
+                java.declaresVariable of variableIRI
+            }
         }
+    }
 
-        // Lets clarify the type of the variable and deal with unloaded types
-        val variableType = try {
-            JavaType.LoadedType(variableInfo.jdiLocalVariable.type())
-        } catch (e: ClassNotLoadedException) {
-            JavaType.UnloadedType(variableInfo.jdiLocalVariable.typeName())
-        }
+    val variableTypeInfo = variableInfo.typeInfo
+    val variableTypeIRI = IRIs.genTypeIRI(variableTypeInfo)
 
-        // A variable declaration is modeled as a property that relates StackFrames and the variable values.
-        // This allows to encode the typing of the variable into the property range.
-
-        // The kind of property and range depend on the variable type:
-        when (variableType) {
-            is JavaType.LoadedType -> {
-                when (val variableTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(variableType.type)) {
-                    is TypeInfo.ReferenceTypeInfo.CreatedType -> {
-                        // If its a reference type, then it must be an ObjectProperty
-                        tripleCollector.addStatement(
-                            variableIRI,
-                            IRIs.rdf.type,
-                            IRIs.owl.ObjectProperty
-                        )
-
-                        // ...and the variable property ranges over the reference type of the variable
-                        // and the null value:
-
-                        val variableTypeIRI = IRIs.prog.genReferenceTypeIRI(variableTypeInfo)
-                        tripleCollector.addStatement(
-                            variableIRI,
-                            IRIs.rdfs.range,
-                            withCreatedTypeContext( variableTypeInfo, variableTypeIRI ) {
-                                addReferenceOrNullClass(this)
-                            }
-                        )
+    when (variableTypeInfo) {
+        is TypeInfo.PrimitiveTypeInfo -> {
+            with(IRIs) {
+                tripleCollector.dsl {
+                    variableIRI {
+                        rdf.type of owl.DatatypeProperty
+                        rdfs.range of variableTypeIRI
                     }
-                    is TypeInfo.PrimitiveTypeInfo -> {
-                        tripleCollector.addStatement(
-                            variableIRI,
-                            IRIs.rdf.type,
-                            IRIs.owl.DatatypeProperty
-                        )
-
-                        val datatypeIRI = IRIs.java.genPrimitiveTypeIRI(variableTypeInfo)
-                        if (datatypeIRI == null) {
-                            logger.error("Unknown primitive data type: ${variableType.type}")
-                            return
-                        }
-
-                        tripleCollector.addStatement(
-                            variableIRI,
-                            IRIs.rdfs.range,
-                            datatypeIRI
-                        )
-                    }
-                    else -> logger.error("Encountered unknown kind of type: ${variableType.type}")
                 }
             }
-            is JavaType.UnloadedType -> {
-                val variableTypeInfo = buildParameters.typeInfoProvider.getNotYetLoadedTypeInfo(variableType.typeName)
-                val variableTypeIRI = IRIs.prog.genReferenceTypeIRI(variableTypeInfo)
+        }
+        is TypeInfo.ReferenceTypeInfo -> {
+            with(IRIs) {
+                tripleCollector.dsl {
+                    variableIRI {
+                        rdf.type of owl.ObjectProperty
+                        rdfs.range of (variableTypeIRI `⊔` oneOf(java.`null`))
+                    }
+                }
+            }
 
+            if (variableTypeInfo is TypeInfo.ReferenceTypeInfo.NotYetLoadedType) {
                 withNotYetLoadedTypeContext(variableTypeInfo, variableTypeIRI) {
                     mapNotYetLoadedType(this)
                 }
-
-                tripleCollector.addStatement(
-                    variableIRI,
-                    IRIs.rdf.type,
-                    IRIs.owl.ObjectProperty
-                )
-
-                tripleCollector.addStatement(
-                    variableIRI,
-                    IRIs.rdfs.range,
-                    variableTypeIRI
-                )
             }
         }
+    }
 
-        // Variables are always functional properties
+    // Include line info, if we have it
+    val line = variableInfo.getLine()
+    if (line != null) {
         tripleCollector.addStatement(
             variableIRI,
-            IRIs.rdf.type,
-            IRIs.owl.FunctionalProperty
-        )
-
-        // The property domain is a StackFrame
-        tripleCollector.addStatement(
-            variableIRI,
-            IRIs.rdfs.domain,
-            IRIs.java.StackFrame
+            IRIs.java.isAtLine,
+            NodeFactory.createLiteralByValue(line, XSDDatatype.XSDint)
         )
     }
 }
+
 interface VariableDeclarationContext: MethodContext {
     val variableInfo: LocalVariableInfo
     val variableIRI: String
