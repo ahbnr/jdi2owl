@@ -122,7 +122,7 @@ class OntIRIs(val ns: Namespaces) {
         val hasAccessModifier = ns.java + "hasAccessModifier"
         val AccessModifier = ns.java + "AccessModifier"
 
-        fun genPrimitiveTypeIRI(type: TypeInfo.PrimitiveTypeInfo): String? = when (type.jdiType) {
+        fun genPrimitiveTypeIRI(type: TypeInfo.PrimitiveTypeInfo): String = when (type.jdiType) {
             is BooleanType -> XSDDatatype.XSDboolean
             is ByteType -> XSDDatatype.XSDbyte
             is CharType -> XSDDatatype.XSDunsignedShort
@@ -131,8 +131,8 @@ class OntIRIs(val ns: Namespaces) {
             is IntegerType -> XSDDatatype.XSDint
             is LongType -> XSDDatatype.XSDlong
             is ShortType -> XSDDatatype.XSDshort
-            else -> null
-        }?.uri
+            else -> throw RuntimeException("Encountered unknown Java primitive type. This should never happen.")
+        }.uri
     }
 
     val java = JavaIRIs()
@@ -173,6 +173,13 @@ class OntIRIs(val ns: Namespaces) {
     }
 
     val prog = ProgIRIs()
+
+    fun genTypeIRI(typeInfo: TypeInfo): String =
+        when (typeInfo) {
+            is TypeInfo.PrimitiveTypeInfo -> java.genPrimitiveTypeIRI(typeInfo)
+            is TypeInfo.ReferenceTypeInfo -> prog.genReferenceTypeIRI(typeInfo)
+            is TypeInfo.VoidTypeInfo -> throw RuntimeException("We do not map the void type. It has no IRI.")
+        }
 
     inner class RunIRIs {
         fun genFrameIRI(frameDepth: Int): String =

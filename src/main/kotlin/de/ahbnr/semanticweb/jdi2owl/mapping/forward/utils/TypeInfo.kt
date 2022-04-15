@@ -25,7 +25,7 @@ sealed class TypeInfo(
         ): ReferenceTypeInfo(typeInfoProvider) {
             abstract val jdiType: ReferenceType
 
-            fun getFieldInfo(field: Field) = FieldInfo(this, field)
+            fun getFieldInfo(field: Field) = FieldInfo(typeInfoProvider, this, field)
             fun getMethodInfo(jdiMethod: Method) = MethodInfo(typeInfoProvider, jdiMethod)
 
             override val binaryName: String
