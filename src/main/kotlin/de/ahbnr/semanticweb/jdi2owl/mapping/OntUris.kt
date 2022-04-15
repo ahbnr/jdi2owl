@@ -1,8 +1,8 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping
 
 import com.sun.jdi.*
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.FieldInfo
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.FieldInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.LocalVariableInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.LocationInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.MethodInfo

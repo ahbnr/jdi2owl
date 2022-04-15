@@ -1,8 +1,6 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.runtime_components
 
 import com.sun.jdi.*
-import de.ahbnr.semanticweb.jdi2owl.debugging.mirrors.*
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TripleCollector
 import dk.brics.automaton.Datatypes
 import org.apache.jena.datatypes.xsd.XSDDatatype

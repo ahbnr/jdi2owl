@@ -12,6 +12,7 @@ import java.nio.file.Path
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.ClassMapper
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.ObjectMapper
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.StackMapper
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfoProvider
 
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin

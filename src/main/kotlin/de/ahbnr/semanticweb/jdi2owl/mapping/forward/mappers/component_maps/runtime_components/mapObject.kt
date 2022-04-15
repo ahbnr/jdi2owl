@@ -1,7 +1,7 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.runtime_components
 
 import com.sun.jdi.*
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.program_structure.CreatedTypeContext
 import org.apache.jena.datatypes.xsd.XSDDatatype
 import org.apache.jena.graph.NodeFactory

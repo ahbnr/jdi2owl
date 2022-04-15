@@ -1,8 +1,7 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.runtime_components
 
 import com.sun.jdi.*
-import de.ahbnr.semanticweb.jdi2owl.debugging.mirrors.*
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 
 fun mapArray(context: ObjectContext) = with(context) {
     val `object` = `object`

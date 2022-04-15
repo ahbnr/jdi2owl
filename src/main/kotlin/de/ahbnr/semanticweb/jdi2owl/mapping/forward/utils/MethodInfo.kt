@@ -6,13 +6,10 @@ import com.sun.jdi.LocalVariable
 import com.sun.jdi.Method
 import de.ahbnr.semanticweb.jdi2owl.debugging.utils.InternalJDIUtils
 import de.ahbnr.semanticweb.jdi2owl.Logger
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.HasRCN
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfoProvider
 import org.apache.commons.collections4.MultiValuedMap
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.koin.core.time.measureDuration
 import spoon.reflect.CtModel
 import spoon.reflect.code.CtBlock
 import spoon.reflect.code.CtLocalVariable
@@ -22,7 +19,6 @@ import spoon.reflect.declaration.CtMethod
 import spoon.reflect.path.CtPathStringBuilder
 import spoon.reflect.visitor.filter.LocalVariableScopeFunction
 import spoon.reflect.visitor.filter.TypeFilter
-import kotlin.math.log
 
 class MethodInfo(
     val typeInfoProvider: TypeInfoProvider,

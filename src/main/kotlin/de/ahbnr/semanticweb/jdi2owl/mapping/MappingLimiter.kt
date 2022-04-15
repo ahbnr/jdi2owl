@@ -2,7 +2,7 @@ package de.ahbnr.semanticweb.jdi2owl.mapping
 
 import com.sun.jdi.*
 import de.ahbnr.semanticweb.jdi2owl.debugging.ReferenceContexts
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 
 class MappingLimiter(
     val settings: MappingSettings

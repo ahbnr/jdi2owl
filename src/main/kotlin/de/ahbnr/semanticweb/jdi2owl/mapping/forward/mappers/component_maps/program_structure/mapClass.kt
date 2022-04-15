@@ -1,7 +1,7 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.program_structure
 
 import de.ahbnr.semanticweb.jdi2owl.mapping.datatypes.JavaAccessModifierDatatype
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 
 fun mapClass(context: ClassContext) = with(context) {
     with (IRIs) {

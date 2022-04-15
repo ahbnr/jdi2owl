@@ -1,7 +1,7 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.runtime_components
 
 import com.sun.jdi.Value
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.FieldInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.FieldInfo
 
 fun mapFields(context: ObjectContext) {
     with(context) {

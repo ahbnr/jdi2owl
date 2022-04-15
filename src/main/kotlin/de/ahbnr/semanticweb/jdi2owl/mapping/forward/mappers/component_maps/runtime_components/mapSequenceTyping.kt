@@ -1,6 +1,6 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.runtime_components
 
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.program_structure.withRefTypeContext
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.utils.addReferenceOrNullClass
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TripleCollector

@@ -5,7 +5,7 @@ import com.sun.jdi.ThreadReference
 import de.ahbnr.semanticweb.jdi2owl.debugging.mirrors.*
 import de.ahbnr.semanticweb.jdi2owl.debugging.mirrors.PrimitiveWrapperMirror
 import de.ahbnr.semanticweb.jdi2owl.debugging.mirrors.utils.MirroringError
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.extendsClass
 
 fun mapPrimitiveWrapperObject(context: ObjectContext) = with(context) {

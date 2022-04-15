@@ -1,8 +1,8 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.program_structure
 
 import com.sun.jdi.ClassNotLoadedException
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.FieldInfo
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.FieldInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.utils.addReferenceOrNullClass
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.JavaType
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TripleCollector
