@@ -33,7 +33,7 @@ class SimpleJDI2OWLApp: AutoCloseable {
             modules(
                 module {
                     single { this@SimpleJDI2OWLApp.logger as Logger }
-                    single { OntURIs(genDefaultNs()) }
+                    single { OntIRIs(genDefaultNs()) }
                 }
             )
         }

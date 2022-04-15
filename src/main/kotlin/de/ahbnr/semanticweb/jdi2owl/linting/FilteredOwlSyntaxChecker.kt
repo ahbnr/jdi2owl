@@ -2,7 +2,7 @@ package de.ahbnr.semanticweb.jdi2owl.linting
 
 import com.github.owlcs.ontapi.jena.model.OntObject
 import de.ahbnr.semanticweb.jdi2owl.Logger
-import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
+import de.ahbnr.semanticweb.jdi2owl.mapping.OntIRIs
 import openllet.pellint.rdfxml.OWLEntityDatabase
 import openllet.pellint.rdfxml.OWLSyntaxChecker
 import openllet.pellint.rdfxml.RDFModel
@@ -19,12 +19,12 @@ class FilteredOwlSyntaxChecker(
     private val model: Model,
     private val namespacesToFiler: Set<String>
 ) : KoinComponent {
-    private val URIs: OntURIs by inject()
+    private val IRIs: OntIRIs by inject()
 
-    private val annotationSourceProperty = model.getProperty(URIs.owl.annotatedSource)
-    private val annotationTargetProperty = model.getProperty(URIs.owl.annotatedTarget)
+    private val annotationSourceProperty = model.getProperty(IRIs.owl.annotatedSource)
+    private val annotationTargetProperty = model.getProperty(IRIs.owl.annotatedTarget)
 
-    private val chainsPropertiesProperty = model.getProperty(URIs.macros.chainsProperties)
+    private val chainsPropertiesProperty = model.getProperty(IRIs.macros.chainsProperties)
 
     private fun filterUntyped(toFilter: Set<RDFNode>): Set<RDFNode> =
         toFilter.filter {
@@ -110,7 +110,7 @@ class FilteredOwlSyntaxChecker(
 
 class OwlSyntaxLints : KoinComponent {
     private val logger: Logger by inject()
-    private val URIs: OntURIs by inject()
+    private val IRIs: OntIRIs by inject()
 
     private sealed class Lint {
         class Node(val node: RDFNode) : Lint() {
@@ -148,7 +148,7 @@ class OwlSyntaxLints : KoinComponent {
     val onlyUntypedJavaObjects: Boolean
         get() =
             lints.isEmpty() || lints.size == 1 && lints.keys.contains("Untyped individuals") && lints["Untyped individuals"]!!.all {
-                it is Lint.Node && it.node is Resource && it.node.isURIResource && URIs.run.isObjectURI(
+                it is Lint.Node && it.node is Resource && it.node.isURIResource && IRIs.run.isObjectIRI(
                     it.node.uri
                 )
             }
@@ -187,7 +187,7 @@ class OwlSyntaxLints : KoinComponent {
                     val line = "- ${lint.render()}"
 
                     val isUntypedJavaObject =
-                        lint is Lint.Node && lint.node is Resource && lint.node.isURIResource && URIs.run.isObjectURI(
+                        lint is Lint.Node && lint.node is Resource && lint.node.isURIResource && IRIs.run.isObjectIRI(
                             lint.node.uri
                         )
                     if (isUntypedJavaObject) {

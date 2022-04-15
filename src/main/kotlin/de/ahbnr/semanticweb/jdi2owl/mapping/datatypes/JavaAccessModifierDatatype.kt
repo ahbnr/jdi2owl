@@ -1,7 +1,7 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.datatypes
 
 import com.sun.jdi.Accessible
-import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
+import de.ahbnr.semanticweb.jdi2owl.mapping.OntIRIs
 import org.apache.jena.datatypes.BaseDatatype
 import org.apache.jena.datatypes.DatatypeFormatException
 import org.apache.jena.datatypes.TypeMapper
@@ -14,7 +14,7 @@ import org.koin.core.component.get
 class JavaAccessModifierDatatype : BaseDatatype {
     companion object : KoinComponent {
         val instance by lazy {
-            val instance = JavaAccessModifierDatatype(get<OntURIs>().java.AccessModifier)
+            val instance = JavaAccessModifierDatatype(get<OntIRIs>().java.AccessModifier)
 
             instance
         }

@@ -2,7 +2,7 @@ package de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils
 
 import com.sun.jdi.*
 import de.ahbnr.semanticweb.jdi2owl.Logger
-import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
+import de.ahbnr.semanticweb.jdi2owl.mapping.OntIRIs
 import org.apache.jena.datatypes.xsd.XSDDatatype
 import org.apache.jena.graph.Node
 import org.apache.jena.graph.NodeFactory
@@ -10,16 +10,16 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class ValueToNodeMapper : KoinComponent {
-    private val URIs: OntURIs by inject()
+    private val IRIs: OntIRIs by inject()
     private val logger: Logger by inject()
 
     fun map(value: Value?): Node? =
         when (value) {
             is PrimitiveValue -> mapPrimitiveValue(value)
-            is ObjectReference -> NodeFactory.createURI(URIs.run.genObjectURI(value))
+            is ObjectReference -> NodeFactory.createURI(IRIs.run.genObjectIRI(value))
             // apparently null values are mirrored directly as null:
             // https://docs.oracle.com/en/java/javase/11/docs/api/jdk.jdi/com/sun/jdi/Value.html
-            null -> NodeFactory.createURI(URIs.java.`null`)
+            null -> NodeFactory.createURI(IRIs.java.`null`)
             else -> {
                 logger.error("Encountered unknown kind of value: ${value}.")
                 null

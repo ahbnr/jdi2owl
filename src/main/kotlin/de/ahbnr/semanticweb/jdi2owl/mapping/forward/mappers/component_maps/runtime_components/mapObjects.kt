@@ -29,7 +29,7 @@ fun mapObjects(context: MappingContext) =
             mappedSequenceComponentTypes
         ) {
             for (objectReference in allObjects) {
-                val objectIRI = IRIs.run.genObjectURI(objectReference)
+                val objectIRI = IRIs.run.genObjectIRI(objectReference)
 
                 val type = objectReference.referenceType()
                 val typeInfo = buildParameters.typeInfoProvider.getTypeInfo(type)

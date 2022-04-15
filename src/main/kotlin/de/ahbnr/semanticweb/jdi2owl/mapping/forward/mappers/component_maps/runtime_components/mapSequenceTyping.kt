@@ -28,25 +28,25 @@ fun mapSequenceTyping(context: SequenceContext) {
 
         mappedSequenceComponentTypes.add(context.componentTypeInfo!!.rcn)
 
-        val typedSequenceElementURI = IRIs.prog.genTypedSequenceElementIRI(componentTypeInfo!!)
+        val typedSequenceElementIRI = IRIs.prog.genTypedSequenceElementIRI(componentTypeInfo!!)
 
         // hasElement<type> Relation
-        val typedHasElementURI = IRIs.prog.genTypedHasElementIRI(componentTypeInfo!!)
+        val typedHasElementIRI = IRIs.prog.genTypedHasElementIRI(componentTypeInfo!!)
 
         tripleCollector.addStatement(
-            typedHasElementURI,
+            typedHasElementIRI,
             IRIs.rdf.type,
             IRIs.owl.ObjectProperty
         )
 
         tripleCollector.addStatement(
-            typedHasElementURI,
+            typedHasElementIRI,
             IRIs.rdf.type,
             IRIs.owl.InverseFunctionalProperty
         )
 
         tripleCollector.addStatement(
-            typedHasElementURI,
+            typedHasElementIRI,
             IRIs.rdfs.subPropertyOf,
             IRIs.java.hasElement
         )
@@ -55,21 +55,21 @@ fun mapSequenceTyping(context: SequenceContext) {
         //   We would have to declare the domain as the union of the array type and all possible
         //   iterable implementors.
         //   This is complex and does not have much use, so we dont declare the domain
-        // val containerTypeUri = IRIs.prog.genReferenceTypeURI(containerType)
+        // val containerTypeUri = IRIs.prog.genReferenceTypeIRI(containerType)
         // tripleCollector.addStatement(
-        //     typedHasElementURI,
+        //     typedHasElementIRI,
         //     IRIs.rdfs.domain,
         //     containerTypeUri
         // )
 
         tripleCollector.addStatement(
-            typedHasElementURI,
+            typedHasElementIRI,
             IRIs.rdfs.range,
-            typedSequenceElementURI
+            typedSequenceElementIRI
         )
 
         tripleCollector.addStatement(
-            typedSequenceElementURI,
+            typedSequenceElementIRI,
             IRIs.rdf.type,
             IRIs.owl.Class
         )
@@ -77,98 +77,98 @@ fun mapSequenceTyping(context: SequenceContext) {
         when (val componentTypeInfo = componentTypeInfo) {
             is TypeInfo.PrimitiveTypeInfo -> {
                 tripleCollector.addStatement(
-                    typedSequenceElementURI,
+                    typedSequenceElementIRI,
                     IRIs.rdfs.subClassOf,
                     IRIs.java.PrimitiveSequenceElement
                 )
 
                 // storesPrimitive Relation
-                val typedStoresPrimitiveURI =
+                val typedStoresPrimitiveIRI =
                     IRIs.prog.genTypedStoresPrimitiveIRI(componentTypeInfo)
 
                 tripleCollector.addStatement(
-                    typedStoresPrimitiveURI,
+                    typedStoresPrimitiveIRI,
                     IRIs.rdf.type,
                     IRIs.owl.DatatypeProperty
                 )
 
                 tripleCollector.addStatement(
-                    typedStoresPrimitiveURI,
+                    typedStoresPrimitiveIRI,
                     IRIs.rdf.type,
                     IRIs.owl.FunctionalProperty
                 )
 
                 tripleCollector.addStatement(
-                    typedStoresPrimitiveURI,
+                    typedStoresPrimitiveIRI,
                     IRIs.rdfs.subPropertyOf,
                     IRIs.java.storesPrimitive
                 )
 
                 tripleCollector.addStatement(
-                    typedStoresPrimitiveURI,
+                    typedStoresPrimitiveIRI,
                     IRIs.rdfs.domain,
-                    typedSequenceElementURI
+                    typedSequenceElementIRI
                 )
 
-                val datatypeURI = IRIs.java.genPrimitiveTypeURI(componentTypeInfo)
-                if (datatypeURI == null) {
+                val datatypeIRI = IRIs.java.genPrimitiveTypeIRI(componentTypeInfo)
+                if (datatypeIRI == null) {
                     logger.error("Unknown primitive data type: ${componentTypeInfo.rcn}.")
                     return
                 }
                 tripleCollector.addStatement(
-                    typedStoresPrimitiveURI,
+                    typedStoresPrimitiveIRI,
                     IRIs.rdfs.range,
-                    datatypeURI
+                    datatypeIRI
                 )
 
                 tripleCollector.addStatement(
-                    typedSequenceElementURI,
+                    typedSequenceElementIRI,
                     IRIs.rdfs.subClassOf,
                     tripleCollector.addConstruct(
                         TripleCollector.BlankNodeConstruct.OWLSome(
-                            typedStoresPrimitiveURI, NodeFactory.createURI(datatypeURI)
+                            typedStoresPrimitiveIRI, NodeFactory.createURI(datatypeIRI)
                         )
                     )
                 )
             }
             is TypeInfo.ReferenceTypeInfo -> {
                 tripleCollector.addStatement(
-                    typedSequenceElementURI,
+                    typedSequenceElementIRI,
                     IRIs.rdfs.subClassOf,
                     IRIs.java.`SequenceElement%3CObject%3E`
                 )
 
                 // storesReference Relation
-                val typedStoresReferenceURI =
+                val typedStoresReferenceIRI =
                     IRIs.prog.genTypedStoresReferenceIRI(componentTypeInfo)
 
                 tripleCollector.addStatement(
-                    typedStoresReferenceURI,
+                    typedStoresReferenceIRI,
                     IRIs.rdf.type,
                     IRIs.owl.ObjectProperty
                 )
 
                 tripleCollector.addStatement(
-                    typedStoresReferenceURI,
+                    typedStoresReferenceIRI,
                     IRIs.rdf.type,
                     IRIs.owl.FunctionalProperty
                 )
 
                 tripleCollector.addStatement(
-                    typedStoresReferenceURI,
+                    typedStoresReferenceIRI,
                     IRIs.rdfs.subPropertyOf,
                     IRIs.java.storesReference
                 )
 
                 tripleCollector.addStatement(
-                    typedStoresReferenceURI,
+                    typedStoresReferenceIRI,
                     IRIs.rdfs.domain,
-                    typedSequenceElementURI
+                    typedSequenceElementIRI
                 )
 
                 val componentTypeIRI = IRIs.prog.genReferenceTypeIRI(componentTypeInfo)
                 tripleCollector.addStatement(
-                    typedStoresReferenceURI,
+                    typedStoresReferenceIRI,
                     IRIs.rdfs.range,
                     withRefTypeContext(componentTypeInfo, componentTypeIRI) {
                         addReferenceOrNullClass(this)
@@ -176,11 +176,11 @@ fun mapSequenceTyping(context: SequenceContext) {
                 )
 
                 tripleCollector.addStatement(
-                    typedSequenceElementURI,
+                    typedSequenceElementIRI,
                     IRIs.rdfs.subClassOf,
                     tripleCollector.addConstruct(
                         TripleCollector.BlankNodeConstruct.OWLSome(
-                            typedStoresReferenceURI,
+                            typedStoresReferenceIRI,
                             withRefTypeContext(componentTypeInfo, componentTypeIRI) {
                                 addReferenceOrNullClass(this)
                             }

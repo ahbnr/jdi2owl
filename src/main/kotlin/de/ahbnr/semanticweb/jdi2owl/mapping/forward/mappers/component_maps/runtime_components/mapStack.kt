@@ -11,7 +11,7 @@ fun mapStack(context: MappingContext) = with(context) {
 
         for (frameDepth in 0 until numFrames) {
             val frame = buildParameters.jvmState.pausedThread.frame(frameDepth)
-            val frameIRI = IRIs.run.genFrameURI(frameDepth)
+            val frameIRI = IRIs.run.genFrameIRI(frameDepth)
 
             withStackFrameContext(frameDepth, frame, frameIRI) {
                 mapStackFrame(this)

@@ -10,8 +10,8 @@ import org.apache.jena.atlas.lib.IRILib
 import org.apache.jena.datatypes.xsd.XSDDatatype
 
 @Suppress("PropertyName")
-class OntURIs(val ns: Namespaces) {
-    inner class RdfURIs {
+class OntIRIs(val ns: Namespaces) {
+    inner class RdfIRIs {
         val type = ns.rdf + "type"
 
         val List = ns.rdf + "List"
@@ -20,18 +20,18 @@ class OntURIs(val ns: Namespaces) {
         val nil = ns.rdf + "nil"
     }
 
-    val rdf = RdfURIs()
+    val rdf = RdfIRIs()
 
-    inner class RdfsURIs {
+    inner class RdfsIRIs {
         val subClassOf = ns.rdfs + "subClassOf"
         val subPropertyOf = ns.rdfs + "subPropertyOf"
         val domain = ns.rdfs + "domain"
         val range = ns.rdfs + "range"
     }
 
-    val rdfs = RdfsURIs()
+    val rdfs = RdfsIRIs()
 
-    inner class OwlURIs {
+    inner class OwlIRIs {
         val Thing = ns.owl + "Thing"
         val Nothing = ns.owl + "Nothing"
 
@@ -60,18 +60,18 @@ class OntURIs(val ns: Namespaces) {
         val sameAs = ns.owl + "sameAs"
     }
 
-    val owl = OwlURIs()
+    val owl = OwlIRIs()
 
-    inner class ShaclURIs {
+    inner class ShaclIRIs {
         val conforms = ns.sh + "conforms"
         val result = ns.sh + "result"
         val focusNode = ns.sh + "focusNode"
         val value = ns.sh + "value"
     }
 
-    val sh = ShaclURIs()
+    val sh = ShaclIRIs()
 
-    inner class JavaURIs {
+    inner class JavaIRIs {
         val UnloadedType = ns.java + "UnloadedType"
         val Class = ns.java + "Class"
         val Method = ns.java + "Method"
@@ -122,7 +122,7 @@ class OntURIs(val ns: Namespaces) {
         val hasAccessModifier = ns.java + "hasAccessModifier"
         val AccessModifier = ns.java + "AccessModifier"
 
-        fun genPrimitiveTypeURI(type: TypeInfo.PrimitiveTypeInfo): String? = when (type.jdiType) {
+        fun genPrimitiveTypeIRI(type: TypeInfo.PrimitiveTypeInfo): String? = when (type.jdiType) {
             is BooleanType -> XSDDatatype.XSDboolean
             is ByteType -> XSDDatatype.XSDbyte
             is CharType -> XSDDatatype.XSDunsignedShort
@@ -135,9 +135,9 @@ class OntURIs(val ns: Namespaces) {
         }?.uri
     }
 
-    val java = JavaURIs()
+    val java = JavaIRIs()
 
-    inner class ProgURIs {
+    inner class ProgIRIs {
         val `java_lang_Object%5B%5D` = ns.prog + IRILib.encodeUriComponent("java.lang.Object[]")
         val java_lang_Object = ns.prog + IRILib.encodeUriComponent("java.lang.Object")
 
@@ -172,44 +172,44 @@ class OntURIs(val ns: Namespaces) {
             "${ns.prog}storesReference${IRILib.encodeUriComponent("<${componentTypeInfo.rcn}>")}"
     }
 
-    val prog = ProgURIs()
+    val prog = ProgIRIs()
 
-    inner class RunURIs {
-        fun genFrameURI(frameDepth: Int): String =
+    inner class RunIRIs {
+        fun genFrameIRI(frameDepth: Int): String =
             "${ns.run}frame$frameDepth"
 
-        private val objectUriPrefix = "${ns.run}object"
+        private val objectIriPrefix = "${ns.run}object"
 
-        fun genObjectURI(objectReference: ObjectReference): String =
-            "$objectUriPrefix${objectReference.uniqueID()}"
+        fun genObjectIRI(objectReference: ObjectReference): String =
+            "$objectIriPrefix${objectReference.uniqueID()}"
 
-        fun isObjectURI(uri: String) =
-            uri.startsWith(objectUriPrefix)
+        fun isObjectIRI(uri: String) =
+            uri.startsWith(objectIriPrefix)
 
-        fun genSequenceElementInstanceURI(containerRef: ObjectReference, index: Int) =
+        fun genSequenceElementInstanceIRI(containerRef: ObjectReference, index: Int) =
             "${ns.run}element${index}_of_${containerRef.uniqueID()}"
     }
 
-    val run = RunURIs()
+    val run = RunIRIs()
 
-    inner class LocalURIs {
+    inner class LocalIRIs {
         val `this` = ns.local + "this"
 
-        fun genLocalVariableURI(variable: LocalVariableInfo): String =
+        fun genLocalVariableIRI(variable: LocalVariableInfo): String =
             "${ns.local}${variable.localName}"
     }
 
-    val local = LocalURIs()
+    val local = LocalIRIs()
 
-    inner class MacrosURIs {
+    inner class MacrosIRIs {
         val chainsProperties = ns.macros + "chainsProperties"
     }
 
-    val macros = MacrosURIs()
+    val macros = MacrosIRIs()
 
     /**
     /**
-     * Type names may contain characters not allowed in URI fragments or with special meaning, e.g. [] in `java.security.Permission[]`
+     * Type names may contain characters not allowed in IRI fragments or with special meaning, e.g. [] in `java.security.Permission[]`
      *
      * https://en.wikipedia.org/wiki/URI_fragment
      * https://datatracker.ietf.org/doc/html/rfc3986/#section-3.5
@@ -217,7 +217,7 @@ class OntURIs(val ns: Namespaces) {
      * This method will properly encode them.
     */
      *
-    fun typeNameToURIFragment(className: String): String {
+    fun typeNameToIRIFragment(className: String): String {
     /**
      * The grammar for a fragment is:
      *       fragment    = *( pchar / "/" / "?" )

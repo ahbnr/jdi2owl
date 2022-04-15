@@ -1,6 +1,6 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils
 
-import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
+import de.ahbnr.semanticweb.jdi2owl.mapping.OntIRIs
 import org.apache.jena.datatypes.xsd.XSDDatatype
 import org.apache.jena.graph.Node
 import org.apache.jena.graph.NodeFactory
@@ -10,21 +10,21 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class TripleCollector(private val triplePattern: Triple) : KoinComponent {
-    private val URIs: OntURIs by inject()
+    private val IRIs: OntIRIs by inject()
 
     private val collectedTriples = mutableSetOf<Triple>()
 
     sealed class BlankNodeConstruct {
         data class RDFList(val objects: List<Node>) : BlankNodeConstruct() {
             companion object {
-                fun fromURIs(objects: List<String>) =
+                fun fromIRIs(objects: List<String>) =
                     RDFList(objects.map { NodeFactory.createURI(it) })
             }
         }
 
         data class OWLUnion(val objects: List<Node>) : BlankNodeConstruct() {
             companion object {
-                fun fromURIs(objects: List<String>) =
+                fun fromIRIs(objects: List<String>) =
                     OWLUnion(objects.map { NodeFactory.createURI(it) })
             }
         }
@@ -133,19 +133,19 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
 
         addStatement(
             restrictionNode,
-            URIs.rdf.type,
-            URIs.owl.Restriction
+            IRIs.rdf.type,
+            IRIs.owl.Restriction
         )
 
         addStatement(
             restrictionNode,
-            URIs.owl.onProperty,
+            IRIs.owl.onProperty,
             cardinalityRestriction.onPropertyUri
         )
 
         addStatement(
             restrictionNode,
-            URIs.owl.onClass,
+            IRIs.owl.onClass,
             cardinalityRestriction.onClassUri
         )
 
@@ -153,7 +153,7 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
             is BlankNodeConstruct.CardinalityType.Exactly ->
                 addStatement(
                     restrictionNode,
-                    URIs.owl.cardinality, // FIXME: This should be owl:qualifiedCardinality shouldnt it?
+                    IRIs.owl.cardinality, // FIXME: This should be owl:qualifiedCardinality shouldnt it?
                     NodeFactory.createLiteralByValue(
                         cardinalityRestriction.cardinality.value,
                         XSDDatatype.XSDnonNegativeInteger
@@ -169,13 +169,13 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
 
         addStatement(
             restrictionNode,
-            URIs.rdf.type,
-            URIs.owl.Restriction
+            IRIs.rdf.type,
+            IRIs.owl.Restriction
         )
 
         addStatement(
             restrictionNode,
-            URIs.owl.onProperty,
+            IRIs.owl.onProperty,
             cardinalityRestriction.onPropertyUri
         )
 
@@ -183,7 +183,7 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
             is BlankNodeConstruct.CardinalityType.Exactly ->
                 addStatement(
                     restrictionNode,
-                    URIs.owl.cardinality, // FIXME: This should be owl:qualifiedCardinality shouldnt it?
+                    IRIs.owl.cardinality, // FIXME: This should be owl:qualifiedCardinality shouldnt it?
                     NodeFactory.createLiteralByValue(
                         cardinalityRestriction.cardinality.value,
                         XSDDatatype.XSDnonNegativeInteger
@@ -199,13 +199,13 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
 
         addStatement(
             blankNode,
-            URIs.rdf.type,
-            URIs.owl.ObjectProperty
+            IRIs.rdf.type,
+            IRIs.owl.ObjectProperty
         )
 
         addStatement(
             blankNode,
-            URIs.owl.inverseOf,
+            IRIs.owl.inverseOf,
             inversePropertyConstruct.basePropertyUri
         )
 
@@ -217,19 +217,19 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
 
         addStatement(
             restrictionNode,
-            URIs.rdf.type,
-            URIs.owl.Restriction
+            IRIs.rdf.type,
+            IRIs.owl.Restriction
         )
 
         addStatement(
             restrictionNode,
-            URIs.owl.onProperty,
+            IRIs.owl.onProperty,
             owlSome.property
         )
 
         addStatement(
             restrictionNode,
-            URIs.owl.someValuesFrom,
+            IRIs.owl.someValuesFrom,
             owlSome.some
         )
 
@@ -241,15 +241,15 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
 
         addStatement(
             oneOfNode,
-            NodeFactory.createURI(URIs.owl.oneOf),
+            NodeFactory.createURI(IRIs.owl.oneOf),
             addListStatements(objectList)
         )
 
         // Protege will not recognize the oneOf relation if we dont add this "is a class" declaration
         addStatement(
             oneOfNode,
-            URIs.rdf.type,
-            URIs.owl.Class
+            IRIs.rdf.type,
+            IRIs.owl.Class
         )
 
         return oneOfNode
@@ -260,13 +260,13 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
 
         addStatement(
             unionNode,
-            URIs.rdf.type,
-            URIs.owl.Class
+            IRIs.rdf.type,
+            IRIs.owl.Class
         )
 
         addStatement(
             unionNode,
-            NodeFactory.createURI(URIs.owl.unionOf),
+            NodeFactory.createURI(IRIs.owl.unionOf),
             addListStatements(objectList)
         )
 
@@ -277,7 +277,7 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
         val firstObject = objectList.firstOrNull()
 
         return if (firstObject == null) {
-            val root = NodeFactory.createURI(URIs.rdf.nil)
+            val root = NodeFactory.createURI(IRIs.rdf.nil)
 
             root
         } else {
@@ -297,15 +297,15 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
     }
 
     private fun genList(root: Node, first: Node, rest: List<Node>): Sequence<Triple> = sequence {
-        yield(Triple(root, NodeFactory.createURI(URIs.rdf.type), NodeFactory.createURI(URIs.rdf.List)))
-        yield(Triple(root, NodeFactory.createURI(URIs.rdf.first), first))
+        yield(Triple(root, NodeFactory.createURI(IRIs.rdf.type), NodeFactory.createURI(IRIs.rdf.List)))
+        yield(Triple(root, NodeFactory.createURI(IRIs.rdf.first), first))
 
         val firstOfRest = rest.firstOrNull()
         if (firstOfRest == null) {
-            yield(Triple(root, NodeFactory.createURI(URIs.rdf.rest), NodeFactory.createURI(URIs.rdf.nil)))
+            yield(Triple(root, NodeFactory.createURI(IRIs.rdf.rest), NodeFactory.createURI(IRIs.rdf.nil)))
         } else {
             val restRoot = NodeFactory.createBlankNode()
-            yield(Triple(root, NodeFactory.createURI(URIs.rdf.rest), restRoot))
+            yield(Triple(root, NodeFactory.createURI(IRIs.rdf.rest), restRoot))
             yieldAll(genList(restRoot, firstOfRest, rest.drop(1)))
         }
     }

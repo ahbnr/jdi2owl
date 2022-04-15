@@ -17,9 +17,9 @@ fun mapLocalVariable(context: VariableValueContext) = with(context) {
 
         // The values of the current stackframe get special, easily accessible names
         if (frameDepth == 0) {
-            val localVarURI = IRIs.local.genLocalVariableURI(variableInfo)
+            val localVarIRI = IRIs.local.genLocalVariableIRI(variableInfo)
             tripleCollector.addStatement(
-                localVarURI,
+                localVarIRI,
                 IRIs.rdf.type,
                 IRIs.owl.NamedIndividual
             )
@@ -28,7 +28,7 @@ fun mapLocalVariable(context: VariableValueContext) = with(context) {
             //   Is this valid OWL 2?
             //   Probably not, 'SameIndividual( local:x "1"^^xsd:int )' fails with a parsing error
             tripleCollector.addStatement(
-                localVarURI,
+                localVarIRI,
                 IRIs.owl.sameAs,
                 valueObject
             )

@@ -3,7 +3,7 @@ package de.ahbnr.semanticweb.jdi2owl.linting
 import com.github.owlcs.ontapi.Ontology
 import de.ahbnr.semanticweb.jdi2owl.mapping.MappingLimiter
 import de.ahbnr.semanticweb.jdi2owl.Logger
-import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
+import de.ahbnr.semanticweb.jdi2owl.mapping.OntIRIs
 import openllet.core.vocabulary.BuiltinNamespace
 import openllet.jena.BuiltinTerm
 import openllet.pellint.lintpattern.LintPattern
@@ -27,7 +27,7 @@ enum class LinterMode {
 }
 
 class ModelSanityChecker : KoinComponent {
-    private val URIs: OntURIs by inject()
+    private val IRIs: OntIRIs by inject()
     private val logger: Logger by inject()
 
     fun fullCheck(ontology: Ontology, mappingLimiter: MappingLimiter, linterMode: LinterMode): Boolean {
@@ -43,7 +43,7 @@ class ModelSanityChecker : KoinComponent {
     }
 
     fun checkRdfTyping(model: Model): Boolean {
-        val typeProperty = model.getProperty(URIs.rdf.type)
+        val typeProperty = model.getProperty(IRIs.rdf.type)
 
         var foundLint = false
 
@@ -77,9 +77,9 @@ class ModelSanityChecker : KoinComponent {
         val checker = FilteredOwlSyntaxChecker(
             model,
             setOf(
-                URIs.ns.rdfs,
-                URIs.ns.rdf,
-                URIs.ns.owl,
+                IRIs.ns.rdfs,
+                IRIs.ns.rdf,
+                IRIs.ns.owl,
             )
         )
         val lints = checker.validate()
@@ -117,8 +117,8 @@ class ModelSanityChecker : KoinComponent {
         val violationRemovalFilters: List<(OWLProfileViolation) -> Boolean> = listOf(
             // Protege produces `owl:Class rdf:type owl:Class` axioms, which are unfortunately detected as use of
             // reserved vocabulary
-            { it is UseOfReservedVocabularyForIndividualIRI && it.expression.iri.iriString == URIs.owl.Class },
-            { it is UseOfReservedVocabularyForClassIRI && it.expression.iri.iriString == URIs.owl.Class }
+            { it is UseOfReservedVocabularyForIndividualIRI && it.expression.iri.iriString == IRIs.owl.Class },
+            { it is UseOfReservedVocabularyForClassIRI && it.expression.iri.iriString == IRIs.owl.Class }
         )
 
         val violations = profileReport.violations

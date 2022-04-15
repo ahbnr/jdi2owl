@@ -16,7 +16,7 @@ fun mapTypeInstanceClosure(context: ObjectMappingContext) = with(context) {
                 // val instances = referenceType.instances(Long.MAX_VALUE)
                 val instanceIRIs = allObjects
                     .filter { it.referenceType() == referenceType }
-                    .map { IRIs.run.genObjectURI(it) }
+                    .map { IRIs.run.genObjectIRI(it) }
 
                 // If there are instances, we declare the type equivalent to a nominal containing all its instances
                 if (instanceIRIs.isNotEmpty()) {

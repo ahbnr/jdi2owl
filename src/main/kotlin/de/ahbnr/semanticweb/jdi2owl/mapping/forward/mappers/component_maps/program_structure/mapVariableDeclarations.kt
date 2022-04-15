@@ -98,8 +98,8 @@ fun mapVariableDeclaration(context: VariableDeclarationContext) {
                             IRIs.owl.DatatypeProperty
                         )
 
-                        val datatypeURI = IRIs.java.genPrimitiveTypeURI(variableTypeInfo)
-                        if (datatypeURI == null) {
+                        val datatypeIRI = IRIs.java.genPrimitiveTypeIRI(variableTypeInfo)
+                        if (datatypeIRI == null) {
                             logger.error("Unknown primitive data type: ${variableType.type}")
                             return
                         }
@@ -107,7 +107,7 @@ fun mapVariableDeclaration(context: VariableDeclarationContext) {
                         tripleCollector.addStatement(
                             variableIRI,
                             IRIs.rdfs.range,
-                            datatypeURI
+                            datatypeIRI
                         )
                     }
                     else -> logger.error("Encountered unknown kind of type: ${variableType.type}")

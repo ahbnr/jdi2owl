@@ -1,7 +1,7 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.macros
 
 import de.ahbnr.semanticweb.jdi2owl.Logger
-import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
+import de.ahbnr.semanticweb.jdi2owl.mapping.OntIRIs
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.Property
 import org.apache.jena.rdf.model.RDFList
@@ -10,7 +10,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class Chain : Macro, KoinComponent {
-    private val URIs: OntURIs by inject()
+    private val IRIs: OntIRIs by inject()
     private val logger: Logger by inject()
 
     private class ChainCall(
@@ -21,9 +21,9 @@ class Chain : Macro, KoinComponent {
     )
 
     private inner class ChainExecutor(private val rdfGraph: Model) {
-        private val rdfTypeProperty = rdfGraph.getProperty(URIs.rdf.type)
-        private val datatypeProperty = rdfGraph.getResource(URIs.owl.DatatypeProperty)
-        private val objectProperty = rdfGraph.getResource(URIs.owl.ObjectProperty)
+        private val rdfTypeProperty = rdfGraph.getProperty(IRIs.rdf.type)
+        private val datatypeProperty = rdfGraph.getResource(IRIs.owl.DatatypeProperty)
+        private val objectProperty = rdfGraph.getResource(IRIs.owl.ObjectProperty)
 
         private fun findPropertyType(property: Resource): Resource? =
             if (property.hasProperty(rdfTypeProperty, datatypeProperty))
@@ -33,7 +33,7 @@ class Chain : Macro, KoinComponent {
             else null
 
         fun findChains() = sequence {
-            val chainsPropertiesProperty = rdfGraph.getProperty(URIs.macros.chainsProperties)
+            val chainsPropertiesProperty = rdfGraph.getProperty(IRIs.macros.chainsProperties)
 
             targetLoop@ for (chainTarget in rdfGraph.listSubjectsWithProperty(chainsPropertiesProperty)) {
                 if (!chainTarget.isURIResource) {
@@ -73,7 +73,7 @@ class Chain : Macro, KoinComponent {
                     val propertyResource = propertyNode.asResource()
                     val propertyType = findPropertyType(propertyResource)
 
-                    if (propertyType != null && propertyType.uri == URIs.owl.DatatypeProperty && idx != rawChainList.size() - 1
+                    if (propertyType != null && propertyType.uri == IRIs.owl.DatatypeProperty && idx != rawChainList.size() - 1
                     ) {
                         logger.error("The chain macro was invoked for $chainTarget. Only the last property of a chain can be a OWL DatatypeProperty, but $propertyNode is not listed last.")
                         continue@targetLoop

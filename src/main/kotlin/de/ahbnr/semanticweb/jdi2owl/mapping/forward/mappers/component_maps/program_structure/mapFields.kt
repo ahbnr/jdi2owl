@@ -86,12 +86,12 @@ fun mapField(context: FieldContext) {
                         //   It is a form of closure axiom. Should we really enforce this?
                         //   It does create reasoning overhead
                         // tripleCollector.addStatement(
-                        //     classURI,
-                        //     URIs.rdfs.subClassOf,
+                        //     classIRI,
+                        //     IRIs.rdfs.subClassOf,
                         //     tripleCollector.addConstruct(
                         //         TripleCollector.BlankNodeConstruct.OWLSome(
-                        //             fieldURI,
-                        //             addReferenceOrNullClass(URIs.prog.genReferenceTypeURI(fieldType.type))
+                        //             fieldIRI,
+                        //             addReferenceOrNullClass(IRIs.prog.genReferenceTypeIRI(fieldType.type))
                         //         )
                         //     )
                         // )
@@ -105,7 +105,7 @@ fun mapField(context: FieldContext) {
                         IRIs.owl.DatatypeProperty
                     )
 
-                    val datatypeIRI = IRIs.java.genPrimitiveTypeURI(fieldTypeInfo)
+                    val datatypeIRI = IRIs.java.genPrimitiveTypeIRI(fieldTypeInfo)
                     if (datatypeIRI == null) {
                         logger.error("Unknown primitive data type: ${fieldType.type}")
                         return
@@ -123,12 +123,12 @@ fun mapField(context: FieldContext) {
                         //   It is a form of closure axiom. Should we really enforce this?
                         //   It does create reasoning overhead
                         // tripleCollector.addStatement(
-                        //     classURI,
-                        //     URIs.rdfs.subClassOf,
+                        //     classIRI,
+                        //     IRIs.rdfs.subClassOf,
                         //     tripleCollector.addConstruct(
                         //         TripleCollector.BlankNodeConstruct.OWLSome(
-                        //             fieldURI,
-                        //             NodeFactory.createURI(datatypeURI)
+                        //             fieldIRI,
+                        //             NodeFactory.createIRI(datatypeIRI)
                         //         )
                         //     )
                         // )

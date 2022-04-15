@@ -64,7 +64,7 @@ fun mapSequence(context: SequenceContext) {
         //   ] .
         val elementIRIs = elements
             .indices
-            .map { idx -> IRIs.run.genSequenceElementInstanceURI(`object`, idx) }
+            .map { idx -> IRIs.run.genSequenceElementInstanceIRI(`object`, idx) }
         tripleCollector.addStatement(
             if (elementIRIs.isEmpty())
                 NodeFactory.createURI(IRIs.owl.Nothing)
@@ -97,43 +97,43 @@ fun mapSequence(context: SequenceContext) {
         // # More concrete hasElement relation
         // Create sub-relation of hasElement<Type> relation for this particular array/iterable object to encode
         // the container size in the cardinalit == nully
-        val typedHasElementURI = IRIs.prog.genTypedHasElementIRI(componentTypeInfo)
-        val typedSequenceElementURI = IRIs.prog.genTypedSequenceElementIRI(componentTypeInfo)
+        val typedHasElementIRI = IRIs.prog.genTypedHasElementIRI(componentTypeInfo)
+        val typedSequenceElementIRI = IRIs.prog.genTypedSequenceElementIRI(componentTypeInfo)
 
         // add the actual elements
         for ((idx, elementValue) in elements.withIndex()) {
-            val elementInstanceURI = IRIs.run.genSequenceElementInstanceURI(`object`, idx)
+            val elementInstanceIRI = IRIs.run.genSequenceElementInstanceIRI(`object`, idx)
             tripleCollector.addStatement(
-                elementInstanceURI,
+                elementInstanceIRI,
                 IRIs.rdf.type,
                 IRIs.owl.NamedIndividual
             )
 
             tripleCollector.addStatement(
-                elementInstanceURI,
+                elementInstanceIRI,
                 IRIs.rdf.type,
-                typedSequenceElementURI
+                typedSequenceElementIRI
             )
 
             tripleCollector.addStatement(
-                elementInstanceURI,
+                elementInstanceIRI,
                 IRIs.java.hasIndex,
                 NodeFactory.createLiteralByValue(idx, XSDDatatype.XSDint)
             )
 
             if (idx < elements.size - 1) {
-                val nextElementInstanceURI = IRIs.run.genSequenceElementInstanceURI(`object`, idx + 1)
+                val nextElementInstanceIRI = IRIs.run.genSequenceElementInstanceIRI(`object`, idx + 1)
 
                 tripleCollector.addStatement(
-                    elementInstanceURI,
+                    elementInstanceIRI,
                     IRIs.java.hasSuccessor,
-                    nextElementInstanceURI
+                    nextElementInstanceIRI
                 )
             } else {
                 // encode hasSuccessor cardinality, to make it clear that there is no successor
                 // (we are closing the world here!)
                 tripleCollector.addStatement(
-                    elementInstanceURI,
+                    elementInstanceIRI,
                     IRIs.rdf.type,
                     tripleCollector.addConstruct(
                         TripleCollector.BlankNodeConstruct.OWLObjectCardinalityRestriction(
@@ -147,26 +147,26 @@ fun mapSequence(context: SequenceContext) {
 
             tripleCollector.addStatement(
                 objectIRI,
-                typedHasElementURI,
-                elementInstanceURI
+                typedHasElementIRI,
+                elementInstanceIRI
             )
 
             val valueNode = valueMapper.map(elementValue)
             if (valueNode != null) {
                 when (val componentTypeInfo = componentTypeInfo) {
                     is TypeInfo.PrimitiveTypeInfo -> {
-                        val typedStoresPrimitiveURI = IRIs.prog.genTypedStoresPrimitiveIRI(componentTypeInfo)
+                        val typedStoresPrimitiveIRI = IRIs.prog.genTypedStoresPrimitiveIRI(componentTypeInfo)
                         tripleCollector.addStatement(
-                            elementInstanceURI,
-                            typedStoresPrimitiveURI,
+                            elementInstanceIRI,
+                            typedStoresPrimitiveIRI,
                             valueNode
                         )
                     }
                     is TypeInfo.ReferenceTypeInfo -> {
-                        val typedStoresReferenceURI = IRIs.prog.genTypedStoresReferenceIRI(componentTypeInfo)
+                        val typedStoresReferenceIRI = IRIs.prog.genTypedStoresReferenceIRI(componentTypeInfo)
                         tripleCollector.addStatement(
-                            elementInstanceURI,
-                            typedStoresReferenceURI,
+                            elementInstanceIRI,
+                            typedStoresReferenceIRI,
                             valueNode
                         )
                     }

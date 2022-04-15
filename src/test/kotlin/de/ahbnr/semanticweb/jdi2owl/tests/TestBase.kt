@@ -1,6 +1,6 @@
 package de.ahbnr.semanticweb.jdi2owl.tests
 
-import de.ahbnr.semanticweb.jdi2owl.mapping.OntURIs
+import de.ahbnr.semanticweb.jdi2owl.mapping.OntIRIs
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.riot.Lang
 import org.apache.jena.riot.RDFFormat
@@ -11,7 +11,7 @@ import org.koin.core.component.inject
 import java.io.File
 
 open class TestBase: KoinComponent {
-    protected val IRIs: OntURIs by inject()
+    protected val IRIs: OntIRIs by inject()
 
     protected fun dumpRDFGraph(rdfGraph: Model, filePath: String) {
         RDFWriter.create(rdfGraph)
