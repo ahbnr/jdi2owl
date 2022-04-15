@@ -37,15 +37,48 @@ fun mapReferenceType(context: CreatedTypeContext) = with(context) {
     mapFields(this)
     mapMethods(this)
 
+    for (directSupertypeInfo in typeInfo.getDirectSupertypes()) {
+        if (buildParameters.limiter.canReferenceTypeBeSkipped(directSupertypeInfo))
+            continue
+
+        val directSupertypeIRI = IRIs.prog.genReferenceTypeIRI(directSupertypeInfo)
+
+        tripleCollector.addStatement(
+            typeIRI,
+            IRIs.rdfs.subClassOf,
+            directSupertypeIRI
+        )
+
+        if (directSupertypeInfo is TypeInfo.ReferenceTypeInfo.NotYetLoadedType) {
+            withNotYetLoadedTypeContext(directSupertypeInfo, directSupertypeIRI) {
+                mapNotYetLoadedType(this)
+            }
+        }
+    }
+
+    // Technically, we do not need to explicitly specify for every reference type that it is subsumed by Object,
+    // because this can be transitively inferred from the supertypes.
+    //
+    // Still, it is useful to do so for query engines that have no inferencing capabilities (e.g. plain SPARQL)
+    // Also, this way, we retain Object as a supertype even if the chain of supertypes is interrupted by the mapping
+    // limiter
+    if (typeInfo.binaryName != "java.lang.Object") {
+        tripleCollector.addStatement(
+            typeIRI,
+            IRIs.rdfs.subClassOf,
+            IRIs.prog.java_lang_Object
+        )
+    }
+
     when (val typeInfo = typeInfo) {
         is TypeInfo.ReferenceTypeInfo.CreatedType.ClassOrInterface.Class ->
             withClassContext(typeInfo) { mapClass(this) }
 
-        is TypeInfo.ReferenceTypeInfo.CreatedType.ArrayType ->
-            withArrayTypeContext(typeInfo) { mapArrayType(this) }
-
         is TypeInfo.ReferenceTypeInfo.CreatedType.ClassOrInterface.Interface ->
             withInterfaceContext(typeInfo) { mapInterface(this) }
+
+        is TypeInfo.ReferenceTypeInfo.CreatedType.ArrayType ->
+            withArrayTypeContext(typeInfo) { mapArrayType(this) }
     }
 }
 

@@ -2,6 +2,7 @@ package de.ahbnr.semanticweb.jdi2owl.mapping
 
 import com.sun.jdi.*
 import de.ahbnr.semanticweb.jdi2owl.debugging.ReferenceContexts
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
 
 class MappingLimiter(
     val settings: MappingSettings
@@ -19,6 +20,12 @@ class MappingLimiter(
     private fun isDeep(fieldOrVariableRCN: String) =
         settings.deepFieldsAndVariables.any {
             fieldOrVariableRCN.startsWith(it)
+        }
+
+    fun canReferenceTypeBeSkipped(typeInfo: TypeInfo.ReferenceTypeInfo) =
+        when (typeInfo) {
+            is TypeInfo.ReferenceTypeInfo.CreatedType -> canReferenceTypeBeSkipped(typeInfo.jdiType)
+            is TypeInfo.ReferenceTypeInfo.NotYetLoadedType -> canReferenceTypeBeSkipped(typeInfo.binaryName)
         }
 
     fun canReferenceTypeBeSkipped(unloadedTypeName: String) =

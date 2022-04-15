@@ -6,59 +6,48 @@ import com.sun.jdi.ReferenceType
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.TypeInfo
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.JavaType
 
-fun mapArrayType(context: ArrayTypeContext) = with(context) {
+fun mapArrayType(context: ArrayTypeContext): Unit = with(context) {
     tripleCollector.addStatement(
         // this, as an individual, is an array:
         typeIRI, IRIs.rdf.type, IRIs.java.Array
     )
 
-    // Now we need to clarify the type of the array elements
-    val componentType = try {
-        JavaType.LoadedType(typeInfo.jdiType.componentType())
-    } catch (e: ClassNotLoadedException) {
-        JavaType.UnloadedType(typeInfo.jdiType.componentTypeName())
-    }
+    when (val componentType = typeInfo.componentType) {
+        is TypeInfo.ReferenceTypeInfo -> {
+            // Technically, we do not need to explicitly specify for every array type whose component type is a reference
+            // type that it is subsumed by Object[],
+            // because this can be transitively inferred from the supertypes.
+            //
+            // Still, it is useful to do so for query engines that have no inferencing capabilities (e.g. plain SPARQL)
+            if (componentType.binaryName != "java.lang.Object") {
+                tripleCollector.addStatement(
+                    typeIRI,
+                    IRIs.rdfs.subClassOf,
+                    IRIs.prog.`java_lang_Object%5B%5D`
+                )
+            }
 
-    // Arrays are also a class (punning) where all member individuals are
-    // members of
-    //    the class Object[] if the component type is a reference type
-    //    the interfaces Cloneable and Serializable if the component type is a primitive type
-    // and some more supertypes, see https://docs.oracle.com/javase/specs/jls/se11/html/jls-4.html#jls-4.10.3
-    //
-    // We define Object[] and the synthetic PrimitiveArray class in the base ontology.
-    // There, additional appropriate OWL superclasses like the above interfaces are already associated.
-    when (componentType) {
-        is JavaType.LoadedType -> {
-            when (componentType.type) {
-                is ReferenceType ->
-                    tripleCollector.addStatement(
-                        typeIRI,
-                        IRIs.rdfs.subClassOf,
-                        IRIs.prog.`java_lang_Object%5B%5D`
-                    )
-                is PrimitiveType ->
-                    tripleCollector.addStatement(
-                        typeIRI,
-                        IRIs.rdfs.subClassOf,
-                        IRIs.java.PrimitiveArray
-                    )
-                else -> logger.error("Encountered unknown kind of type: ${componentType.type}")
+            if (componentType is TypeInfo.ReferenceTypeInfo.NotYetLoadedType) {
+                val componentTypeInfo = buildParameters.typeInfoProvider.getNotYetLoadedTypeInfo(componentType.binaryName)
+                val componentTypeIRI = IRIs.prog.genReferenceTypeIRI(componentTypeInfo)
+                withNotYetLoadedTypeContext(componentTypeInfo, componentTypeIRI) {
+                    mapNotYetLoadedType(this)
+                }
+
+                tripleCollector.addStatement(
+                    typeIRI,
+                    IRIs.rdfs.subClassOf,
+                    IRIs.java.UnloadedTypeArray
+                )
             }
         }
-
-        is JavaType.UnloadedType -> {
-            val componentTypeInfo = buildParameters.typeInfoProvider.getNotYetLoadedTypeInfo(componentType.typeName)
-            val componentTypeIRI = IRIs.prog.genReferenceTypeIRI(componentTypeInfo)
-            withNotYetLoadedTypeContext(componentTypeInfo, componentTypeIRI) {
-                mapNotYetLoadedType(this)
-            }
-
+        is TypeInfo.PrimitiveTypeInfo ->
             tripleCollector.addStatement(
                 typeIRI,
                 IRIs.rdfs.subClassOf,
-                IRIs.java.UnloadedTypeArray
+                IRIs.java.PrimitiveArray
             )
-        }
+        else -> logger.error("Encountered unknown kind of component type: ${typeInfo.componentType}")
     }
 }
 
