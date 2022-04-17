@@ -55,11 +55,31 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
             data class Exactly(val value: Int) : CardinalityType()
         }
 
-        data class OWLObjectCardinalityRestriction(
-            val onPropertyUri: String,
-            val onClassUri: String,
+        class OWLObjectCardinalityRestriction: BlankNodeConstruct {
+            val onProperty: Node
+            val onClassUri: String
             val cardinality: CardinalityType
-        ) : BlankNodeConstruct()
+
+            constructor(
+                onPropertyUri: String,
+                onClassUri: String,
+                cardinality: CardinalityType
+            ) {
+                this.onProperty = NodeFactory.createURI(onPropertyUri)
+                this.onClassUri = onClassUri
+                this.cardinality = cardinality
+            }
+
+            constructor(
+                onProperty: Node,
+                onClassUri: String,
+                cardinality: CardinalityType
+            ) {
+                this.onProperty = onProperty
+                this.onClassUri = onClassUri
+                this.cardinality = cardinality
+            }
+        }
 
         data class OWLDataCardinalityRestriction(
             val onPropertyUri: String,
@@ -140,7 +160,7 @@ class TripleCollector(private val triplePattern: Triple) : KoinComponent {
         addStatement(
             restrictionNode,
             IRIs.owl.onProperty,
-            cardinalityRestriction.onPropertyUri
+            cardinalityRestriction.onProperty
         )
 
         addStatement(
