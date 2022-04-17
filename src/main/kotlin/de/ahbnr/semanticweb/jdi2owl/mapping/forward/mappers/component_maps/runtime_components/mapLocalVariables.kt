@@ -10,24 +10,21 @@ fun mapLocalVariables(context: StackFrameContext) = with(context) {
 
         declaringTypeInfo.getMethodInfo(jdiMethod)
     }
-    val methodVariableDeclarations = methodInfo.jdiMethod.variables()
 
     val variables = try {
         frame.visibleVariables()
     } catch (e: AbsentInformationException) {
         logger.debug("Can not load variable information for frame $frameDepth")
-        null
+        return
     }
 
-    if (variables != null) {
-        val values = frame.getValues(variables)
+    val values = frame.getValues(variables)
 
-        for ((variable, value) in values) {
-            val variableInfo = methodInfo.getVariableInfo(variable)
+    for ((variable, value) in values) {
+        val variableInfo = methodInfo.getVariableInfo(variable)
 
-            withVariableValueContext(value, variableInfo) {
-                mapLocalVariable(this)
-            }
+        withVariableValueContext(value, variableInfo) {
+            mapLocalVariable(this)
         }
     }
 }

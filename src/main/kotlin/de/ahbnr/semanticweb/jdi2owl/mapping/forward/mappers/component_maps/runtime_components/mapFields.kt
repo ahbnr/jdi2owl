@@ -33,7 +33,7 @@ fun mapField(context: FieldValueContext) {
 
         // let's find out the object name, i.e. the name of the field value in case of a reference type value,
         // or the value itself, in case of a primitive value
-        val valueNode = valueMapper.map(value)
+        val valueNode = mapValue(value, this)
 
         if (valueNode != null) {
             tripleCollector.addStatement(

@@ -1,38 +1,33 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.runtime_components
 
+import com.sun.jdi.ObjectReference
 import com.sun.jdi.Value
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.LocalVariableInfo
 
 fun mapLocalVariable(context: VariableValueContext) = with(context) {
-    // we model this via the variable declaration property.
-    // The property value depends on the kind of value we have here
-    val valueObject = valueMapper.map(value)
+    val valueNode = mapValue(value, this) ?: return
 
-    if (valueObject != null) {
+    tripleCollector.addStatement(
+        frameIRI,
+        IRIs.prog.genVariableDeclarationIRI(variableInfo),
+        valueNode
+    )
+
+    // The values of the current stackframe get special, easily accessible names
+    // FIXME: This creates aliases only for object references... not sure yet how to map primitive values
+    if (frameDepth == 0 && (value is ObjectReference || value == null)) {
+        val localVarIRI = IRIs.local.genLocalVariableIRI(variableInfo)
         tripleCollector.addStatement(
-            frameIRI,
-            IRIs.prog.genVariableDeclarationIRI(variableInfo),
-            valueObject
+            localVarIRI,
+            IRIs.rdf.type,
+            IRIs.owl.NamedIndividual
         )
 
-        // The values of the current stackframe get special, easily accessible names
-        if (frameDepth == 0) {
-            val localVarIRI = IRIs.local.genLocalVariableIRI(variableInfo)
-            tripleCollector.addStatement(
-                localVarIRI,
-                IRIs.rdf.type,
-                IRIs.owl.NamedIndividual
-            )
-
-            // FIXME: This declares even data values as the same as a local variable.
-            //   Is this valid OWL 2?
-            //   Probably not, 'SameIndividual( local:x "1"^^xsd:int )' fails with a parsing error
-            tripleCollector.addStatement(
-                localVarIRI,
-                IRIs.owl.sameAs,
-                valueObject
-            )
-        }
+        tripleCollector.addStatement(
+            localVarIRI,
+            IRIs.owl.sameAs,
+            valueNode
+        )
     }
 }
 

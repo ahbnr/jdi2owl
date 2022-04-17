@@ -151,7 +151,7 @@ fun mapSequence(context: SequenceContext) {
                 elementInstanceIRI
             )
 
-            val valueNode = valueMapper.map(elementValue)
+            val valueNode = mapValue(elementValue, this)
             if (valueNode != null) {
                 when (val componentTypeInfo = componentTypeInfo) {
                     is TypeInfo.PrimitiveTypeInfo -> {

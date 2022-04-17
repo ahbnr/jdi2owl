@@ -4,12 +4,10 @@ import com.sun.jdi.ObjectReference
 import de.ahbnr.semanticweb.jdi2owl.debugging.JvmObjectIterator
 import de.ahbnr.semanticweb.jdi2owl.debugging.ReferenceContexts
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.contexts.MappingContext
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.ValueToNodeMapper
 
 fun mapObjects(context: MappingContext) =
     with(context) {
         val referenceContexts = ReferenceContexts()
-        val valueMapper = ValueToNodeMapper()
 
         val iterator = JvmObjectIterator(
             buildParameters,
@@ -25,7 +23,6 @@ fun mapObjects(context: MappingContext) =
         withObjectMappingContext(
             allObjects,
             referenceContexts,
-            valueMapper,
             mappedSequenceComponentTypes
         ) {
             for (objectReference in allObjects) {
@@ -54,20 +51,17 @@ fun mapObjects(context: MappingContext) =
 interface ObjectMappingContext: MappingContext {
     val allObjects: List<ObjectReference>
     val referenceContexts: ReferenceContexts
-    val valueMapper: ValueToNodeMapper
     val mappedSequenceComponentTypes: MutableSet<String>
 }
 
 fun <R> MappingContext.withObjectMappingContext(
     allObjects: List<ObjectReference>,
     referenceContexts: ReferenceContexts,
-    valueMapper: ValueToNodeMapper,
     mappedSequenceComponentTypes: MutableSet<String>,
     block: ObjectMappingContext.() -> R
 ): R =
     object: MappingContext by this, ObjectMappingContext {
         override val allObjects: List<ObjectReference> = allObjects
         override val referenceContexts: ReferenceContexts = referenceContexts
-        override val valueMapper: ValueToNodeMapper = valueMapper
         override val mappedSequenceComponentTypes: MutableSet<String> = mappedSequenceComponentTypes
     }.let(block)

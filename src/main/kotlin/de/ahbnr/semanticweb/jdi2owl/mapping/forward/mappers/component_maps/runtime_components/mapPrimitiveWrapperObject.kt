@@ -32,7 +32,7 @@ fun mapPrimitiveWrapperObject(context: ObjectContext) = with(context) {
             try {
                 val mirror = mirrorConstructor(`object`, buildParameters.jvmState.pausedThread)
                 val valueMirror = mirror.valueMirror()
-                val valueNode = valueMapper.map(valueMirror)
+                val valueNode = mapValue(valueMirror, this)
 
                 if (valueNode != null) {
                     tripleCollector.addStatement(

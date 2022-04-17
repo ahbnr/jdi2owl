@@ -2,35 +2,24 @@ package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.runt
 
 import com.sun.jdi.StackFrame
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.contexts.MappingContext
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.ValueToNodeMapper
 import org.apache.jena.datatypes.xsd.XSDDatatype
 import org.apache.jena.graph.NodeFactory
 
 fun mapStackFrame(context: StackFrameContext) = with(context) {
-    tripleCollector.addStatement(
-        frameIRI,
-        IRIs.rdf.type,
-        IRIs.owl.NamedIndividual
-    )
+    with(IRIs) {
+        tripleCollector.dsl {
+            frameIRI {
+                rdf.type of owl.NamedIndividual
+                rdf.type of java.StackFrame
+                java.isAtStackDepth of NodeFactory.createLiteralByValue(frameDepth, XSDDatatype.XSDint)
+            }
+        }
+    }
 
-    // this *is* a stack frame
-    tripleCollector.addStatement(
-        frameIRI,
-        IRIs.rdf.type,
-        IRIs.java.StackFrame
-    )
-
-    // ...and it is at a certain depth
-    tripleCollector.addStatement(
-        frameIRI,
-        IRIs.java.isAtStackDepth,
-        NodeFactory.createLiteralByValue(frameDepth, XSDDatatype.XSDint)
-    )
-
-    // ...and it oftentimes has a `this` reference:
+    // Mapping this reference, if it is present
     val thisRef = frame.thisObject()
     if (thisRef != null) {
-        val thisObjectNode = valueMapper.map(thisRef)
+        val thisObjectNode = mapValue(thisRef, this)
 
         if (thisObjectNode != null) {
             tripleCollector.addStatement(
@@ -62,7 +51,7 @@ fun mapStackFrame(context: StackFrameContext) = with(context) {
     mapLocalVariables(this)
 }
 
-interface StackFrameContext: StackMappingContext {
+interface StackFrameContext: MappingContext {
     val frameDepth: Int
     // Careful, no invokeMethod calls should take place from here on to keep this frame reference
     // valid.
@@ -70,13 +59,13 @@ interface StackFrameContext: StackMappingContext {
     val frameIRI: String
 }
 
-fun <R> StackMappingContext.withStackFrameContext(
+fun <R> MappingContext.withStackFrameContext(
     frameDepth: Int,
     frame: StackFrame,
     frameIRI: String,
     block: StackFrameContext.() -> R
 ): R =
-    object: StackMappingContext by this, StackFrameContext {
+    object: MappingContext by this, StackFrameContext {
         override val frameDepth: Int = frameDepth
         override val frame: StackFrame = frame
         override val frameIRI: String = frameIRI
