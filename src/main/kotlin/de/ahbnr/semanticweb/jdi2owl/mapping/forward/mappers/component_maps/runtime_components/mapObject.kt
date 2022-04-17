@@ -7,51 +7,37 @@ import org.apache.jena.datatypes.xsd.XSDDatatype
 import org.apache.jena.graph.NodeFactory
 
 fun mapObject(context: ObjectContext) = with(context) {
-    // The object is a particular individual (not a class/concept)
-    tripleCollector.addStatement(
-        objectIRI,
-        IRIs.rdf.type,
-        IRIs.owl.NamedIndividual
-    )
-
-    // it is a java object
-    tripleCollector.addStatement(
-        objectIRI,
-        IRIs.rdf.type,
-        IRIs.java.Object
-    )
-
-    // as such, it has been assigned a unique ID by the VM JDWP agent:
-    tripleCollector.addStatement(
-        objectIRI,
-        IRIs.java.hasJDWPObjectId,
-        NodeFactory.createLiteralByValue(
-            `object`.uniqueID(),
-            XSDDatatype.XSDlong
-        )
-    )
-
-    // it is of a particular java class
-    tripleCollector.addStatement(
-        objectIRI,
-        IRIs.rdf.type,
-        IRIs.prog.genReferenceTypeIRI(typeInfo)
-    )
-
-    // TODO: This should also apply to non class types
-    (typeInfo as? TypeInfo.ReferenceTypeInfo.CreatedType.ClassOrInterface.Class)?.let { typeInfo ->
-        mapFields(this)
-
-        mapIterable(this)
-
-        mapPrimitiveWrapperObject(this)
+    with(IRIs) {
+        tripleCollector.dsl {
+            objectIRI {
+                // The object is a particular individual (not a class/concept)
+                rdf.type of owl.NamedIndividual
+                // it is a java object
+                rdf.type of java.Object
+                // as such, it has been assigned a unique ID by the VM JPDA backend:
+                java.hasUniqueId of NodeFactory.createLiteralByValue(
+                    `object`.uniqueID(),
+                    XSDDatatype.XSDlong
+                )
+                // it is of a particular java class
+                rdf.type of prog.genReferenceTypeIRI(typeInfo)
+            }
+        }
     }
 
-    // Try mapping it as an array, if it is an array
-    mapArray(this)
+    mapFields(this)
+
+    // Try mapping it as an instance of a primitive value mapper class, if it is such a class
+    mapPrimitiveWrapperObject(this)
 
     // Try mapping it as a string, if it is a string
     mapString(this)
+
+    // Try mapping it as an iterable, if it is an instance of a class implementing Iterable
+    mapIterable(this)
+
+    // Try mapping it as an array, if it is an array
+    mapArray(this)
 }
 
 interface ObjectContext: ObjectMappingContext, CreatedTypeContext {

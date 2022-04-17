@@ -113,7 +113,7 @@ class OntIRIs(val ns: Namespaces) {
         val `this` = ns.java + "this"
 
         val isAtStackDepth = ns.java + "isAtStackDepth"
-        val hasJDWPObjectId = ns.java + "hasJDWPObjectId"
+        val hasUniqueId = ns.java + "hasUniqueId"
 
         val hasPlainValue = ns.java + "hasPlainValue"
 

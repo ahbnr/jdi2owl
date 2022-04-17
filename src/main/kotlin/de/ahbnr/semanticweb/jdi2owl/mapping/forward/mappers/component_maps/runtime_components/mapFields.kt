@@ -3,46 +3,40 @@ package de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.component_maps.runt
 import com.sun.jdi.Value
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.FieldInfo
 
-fun mapFields(context: ObjectContext) {
-    with(context) {
-        val fieldValues =
-            `object`.getValues(typeInfo.jdiType.allFields()) // allFields does capture the fields of superclasses
+fun mapFields(context: ObjectContext) = with(context) {
+    val fieldValues =
+        `object`.getValues(typeInfo.jdiType.allFields()) // allFields does capture the fields of superclasses
 
-        for ((field, value) in fieldValues) {
-            if (field.isStatic) // Static fields are handled by addStaticClassMembers
-                continue
+    for ((field, value) in fieldValues) {
+        if (field.isStatic) // Static fields are handled by addStaticClassMembers
+            continue
 
-            val declaringTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(field.declaringType())
-            val fieldInfo = declaringTypeInfo.getFieldInfo(field)
-            val fieldIRI = IRIs.prog.genFieldIRI(fieldInfo)
+        val declaringTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(field.declaringType())
+        val fieldInfo = declaringTypeInfo.getFieldInfo(field)
+        val fieldIRI = IRIs.prog.genFieldIRI(fieldInfo)
 
-            withFieldValueContext(value, fieldReceiverIRI = objectIRI, fieldInfo, fieldIRI) {
-                mapField(this)
-            }
+        withFieldValueContext(value, fieldReceiverIRI = objectIRI, fieldInfo, fieldIRI) {
+            mapField(this)
         }
     }
 }
 
-fun mapField(context: FieldValueContext) {
-    with(context) {
-        if (buildParameters.limiter.canFieldBeSkipped(fieldInfo.jdiField))
-            return
+fun mapField(context: FieldValueContext) = with(context) {
+    if (buildParameters.limiter.canFieldBeSkipped(fieldInfo.jdiField))
+        return
 
-        // we model a field as an instance of the field property of the class.
-        // That one is created by the ClassMapper
+    // we model a field as an instance of the field property of the class.
+    // That one is created by the ClassMapper
 
-        // let's find out the object name, i.e. the name of the field value in case of a reference type value,
-        // or the value itself, in case of a primitive value
-        val valueNode = mapValue(value, this)
+    // let's find out the object name, i.e. the name of the field value in case of a reference type value,
+    // or the value itself, in case of a primitive value
+    val valueNode = mapValue(value, this) ?: return
 
-        if (valueNode != null) {
-            tripleCollector.addStatement(
-                fieldReceiverIRI,
-                fieldIRI,
-                valueNode
-            )
-        }
-    }
+    tripleCollector.addStatement(
+        fieldReceiverIRI,
+        fieldIRI,
+        valueNode
+    )
 }
 
 interface FieldValueContext: ObjectMappingContext {

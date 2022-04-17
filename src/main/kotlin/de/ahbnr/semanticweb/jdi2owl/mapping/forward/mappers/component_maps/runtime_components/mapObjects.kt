@@ -5,48 +5,47 @@ import de.ahbnr.semanticweb.jdi2owl.debugging.JvmObjectIterator
 import de.ahbnr.semanticweb.jdi2owl.debugging.ReferenceContexts
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.mappers.contexts.MappingContext
 
-fun mapObjects(context: MappingContext) =
-    with(context) {
-        val referenceContexts = ReferenceContexts()
+fun mapObjects(context: MappingContext) = with(context) {
+    val referenceContexts = ReferenceContexts()
 
-        val iterator = JvmObjectIterator(
-            buildParameters,
-            referenceContexts
-        )
-        val allObjects = iterator.iterateObjects().toList()
-        iterator.reportErrors()
+    val iterator = JvmObjectIterator(
+        buildParameters,
+        referenceContexts
+    )
+    val allObjects = iterator.iterateObjects().toList()
+    iterator.reportErrors()
 
-        // Names of those component types of arrays and iterables for which typed sequence element triples
-        // already have been added
-        val mappedSequenceComponentTypes = mutableSetOf<String>()
+    // Names of those component types of arrays and iterables for which typed sequence element triples
+    // already have been added
+    val mappedSequenceComponentTypes = mutableSetOf<String>()
 
-        withObjectMappingContext(
-            allObjects,
-            referenceContexts,
-            mappedSequenceComponentTypes
-        ) {
-            for (objectReference in allObjects) {
-                val objectIRI = IRIs.run.genObjectIRI(objectReference)
+    withObjectMappingContext(
+        allObjects,
+        referenceContexts,
+        mappedSequenceComponentTypes
+    ) {
+        for (objectReference in allObjects) {
+            val objectIRI = IRIs.run.genObjectIRI(objectReference)
 
-                val type = objectReference.referenceType()
-                val typeInfo = buildParameters.typeInfoProvider.getTypeInfo(type)
-                val typeIRI = IRIs.prog.genReferenceTypeIRI(typeInfo)
+            val type = objectReference.referenceType()
+            val typeInfo = buildParameters.typeInfoProvider.getTypeInfo(type)
+            val typeIRI = IRIs.prog.genReferenceTypeIRI(typeInfo)
 
-                withObjectContext(
-                    `object` = objectReference,
-                    objectIRI = objectIRI,
-                    typeInfo = typeInfo,
-                    typeIRI = typeIRI
-                ) {
-                    mapObject(this)
-                }
+            withObjectContext(
+                `object` = objectReference,
+                objectIRI = objectIRI,
+                typeInfo = typeInfo,
+                typeIRI = typeIRI
+            ) {
+                mapObject(this)
             }
-
-            mapTypeInstanceClosure(this)
-
-            mapStaticClassMembers(this)
         }
+
+        mapTypeInstanceClosure(this)
+
+        mapStaticClassMembers(this)
     }
+}
 
 interface ObjectMappingContext: MappingContext {
     val allObjects: List<ObjectReference>
