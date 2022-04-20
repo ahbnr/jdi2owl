@@ -7,6 +7,9 @@ import org.apache.jena.datatypes.xsd.XSDDatatype
 import org.apache.jena.graph.NodeFactory
 
 fun mapSequence(context: SequenceContext) = with(context) {
+    if (buildParameters.limiter.settings.noSequenceDescriptions)
+        return
+
     // Encode container size in cardinality restriction
     // (otherwise we won't be able to reliably query for arrays / iterables by their size due to the open world assumption)
     tripleCollector.addStatement(

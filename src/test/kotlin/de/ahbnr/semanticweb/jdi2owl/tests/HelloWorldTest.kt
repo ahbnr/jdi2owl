@@ -5,6 +5,8 @@ import de.ahbnr.semanticweb.jdi2owl.tests.utils.getTestSourceFile
 import de.ahbnr.semanticweb.jdi2owl.utils.SimpleJDI2OWLApp
 import de.ahbnr.semanticweb.jdi2owl.utils.Statistics
 import org.apache.jena.rdf.model.Model
+import org.assertj.core.api.AbstractIntegerAssert
+import org.assertj.core.api.AbstractLongAssert
 import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -60,8 +62,8 @@ class HelloWorldTest: TestBase() {
 
     @Test
     fun `expected statistics`() {
-        fun assertThat(metric: Statistics.Metric<Int>) = assertThat(metric.value)
-        fun assertThat(metric: Statistics.Metric<Long>) = assertThat(metric.value)
+        fun assertThat(metric: Statistics.Metric<Int>): AbstractIntegerAssert<*> = assertThat(metric.value)
+        fun assertThat(metric: Statistics.Metric<Long>): AbstractLongAssert<*> = assertThat(metric.value)
 
         // If these numbers change a lot, either there was a big intentional change in the mapping algorithm,
         // or its a bug

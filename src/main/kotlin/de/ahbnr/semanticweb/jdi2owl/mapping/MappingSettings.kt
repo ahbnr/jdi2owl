@@ -7,6 +7,10 @@ class MappingSettings {
     val additionalShallowPackages: MutableSet<String> = mutableSetOf()
     val deepFieldsAndVariables: MutableSet<String> = mutableSetOf()
 
+    // iff true, if a sequence is deep mapped do not create SequenceElements and associated axioms, but only
+    // map the contained objects only
+    var noSequenceDescriptions = false
+
     var limitSdk: Boolean = false
         set(value) {
             if (field != value) {
