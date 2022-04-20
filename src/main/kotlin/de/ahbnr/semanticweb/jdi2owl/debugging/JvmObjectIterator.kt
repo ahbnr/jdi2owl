@@ -7,7 +7,9 @@ import de.ahbnr.semanticweb.jdi2owl.Logger
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.BuildParameters
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.coroutines.coroutineContext
 
+@OptIn(ExperimentalStdlibApi::class)
 class JvmObjectIterator(
     private val buildParameters: BuildParameters,
     private val contextRecorder: ReferenceContexts?
@@ -196,41 +198,43 @@ class JvmObjectIterator(
         }
     }
 
-    private fun recursivelyIterateObject(
-        objectReference: ObjectReference
-    ): Sequence<ObjectReference> = sequence {
-        val id = objectReference.uniqueID()
-        if (seen.contains(id))
-            return@sequence
-        seen.add(id)
+    private val recursivelyIterateObject = DeepRecursiveFunction<ObjectReference, List<ObjectReference>> { objectReference: ObjectReference ->
+        buildList {
+            val id = objectReference.uniqueID()
+            if (seen.contains(id))
+                return@buildList
+            seen.add(id)
 
-        val referenceType = objectReference.referenceType()
-        val typeInfo = buildParameters.typeInfoProvider.getTypeInfo(referenceType)
+            val referenceType = objectReference.referenceType()
 
-        if (buildParameters.limiter.canReferenceTypeBeSkipped(referenceType))
-            return@sequence
+            if (buildParameters.limiter.canReferenceTypeBeSkipped(referenceType))
+                return@buildList
 
-        for (field in referenceType.allFields()) {
-            if (field.isStatic)
-                continue
+            for (field in referenceType.allFields()) {
+                if (field.isStatic)
+                    continue
 
-            if (buildParameters.limiter.canFieldBeSkipped(field))
-                continue
+                if (buildParameters.limiter.canFieldBeSkipped(field))
+                    continue
 
-            val value = objectReference.getValue(field)
+                val value = objectReference.getValue(field)
 
-            if (value !is ObjectReference)
-                continue
+                if (value !is ObjectReference)
+                    continue
 
-            val declaringTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(field.declaringType())
-            contextRecorder?.addContext(value, ReferenceContexts.Context.ReferencedByField(declaringTypeInfo.getFieldInfo(field)))
-            yieldAll(recursivelyIterateObject(value))
+                val declaringTypeInfo = buildParameters.typeInfoProvider.getTypeInfo(field.declaringType())
+                contextRecorder?.addContext(
+                    value,
+                    ReferenceContexts.Context.ReferencedByField(declaringTypeInfo.getFieldInfo(field))
+                )
+                addAll(callRecursive(value))
 
-            // Now that we have a field context, maybe the object is eligible for deep iteration
-            yieldAll(tryDeepIteration(value))
+                // Now that we have a field context, maybe the object is eligible for deep iteration
+                addAll(tryDeepIteration(value))
+            }
+
+            add(objectReference)
         }
-
-        yield(objectReference)
     }
 
     fun reportErrors() {
