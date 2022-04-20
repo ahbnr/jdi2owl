@@ -88,6 +88,9 @@ class UniversalKnowledgeBaseParser(
     }
 
     fun readIntoModel() {
+        if (fileName != null)
+            logger.debug("Parsing ${fileName}...")
+
         if (fileName == null || fileName.endsWith("owl")) {
             if (readWithOwlApi()) return
         }

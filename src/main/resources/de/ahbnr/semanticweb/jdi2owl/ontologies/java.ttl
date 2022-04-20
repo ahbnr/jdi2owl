@@ -143,13 +143,6 @@ java:hasIndex rdf:type owl:DatatypeProperty ,
               rdfs:range xsd:int .
 
 
-###  https://github.com/ahbnr/SemanticJavaDebugger/Java#hasUniqueId
-java:hasUniqueId rdf:type owl:DatatypeProperty ,
-                              owl:FunctionalProperty ;
-                     rdfs:domain java:ReferenceType ;
-                     rdfs:range xsd:long .
-
-
 ###  https://github.com/ahbnr/SemanticJavaDebugger/Java#hasName
 java:hasName rdf:type owl:DatatypeProperty ,
                       owl:FunctionalProperty ;
@@ -178,6 +171,13 @@ java:hasPlainValue rdf:type owl:DatatypeProperty ,
                                                prog:java.lang.String
                                              )
                                ] .
+
+
+###  https://github.com/ahbnr/SemanticJavaDebugger/Java#hasUniqueId
+java:hasUniqueId rdf:type owl:DatatypeProperty ,
+                          owl:FunctionalProperty ;
+                 rdfs:domain java:ReferenceType ;
+                 rdfs:range xsd:long .
 
 
 ###  https://github.com/ahbnr/SemanticJavaDebugger/Java#hasVariableName
@@ -271,6 +271,15 @@ java:Location rdf:type owl:Class .
 
 ###  https://github.com/ahbnr/SemanticJavaDebugger/Java#Method
 java:Method rdf:type owl:Class .
+
+
+###  https://github.com/ahbnr/SemanticJavaDebugger/Java#NullType
+java:NullType rdf:type owl:Class ;
+              owl:equivalentClass [ rdf:type owl:Class ;
+                                    owl:oneOf ( java:null
+                                              )
+                                  ] ;
+              owl:disjointWith prog:java.lang.Object .
 
 
 ###  https://github.com/ahbnr/SemanticJavaDebugger/Java#Object
@@ -563,6 +572,7 @@ java:PrimitiveArray rdf:type owl:NamedIndividual ,
 
 ###  https://github.com/ahbnr/SemanticJavaDebugger/Java#null
 java:null rdf:type owl:NamedIndividual ,
+                   java:NullType ,
                    java:Object ;
           java:hasUniqueId "0"^^xsd:long .
 
