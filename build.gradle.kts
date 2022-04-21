@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.nio.file.Paths
 
 plugins {
     // id("com.github.johnrengelman.shadow") version "7.1.0"
@@ -19,7 +20,7 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     // Apache Jena
-    implementation("org.apache.jena:apache-jena-libs:4.2.0")
+    api("org.apache.jena:apache-jena-libs:4.2.0")
 
     // Spoon for Java source code analysis
     implementation("fr.inria.gforge.spoon:spoon-core:10.0.1-beta-1")
@@ -41,10 +42,11 @@ dependencies {
     implementation("org.apache.commons:commons-collections4:4.4")
 
     // Dependency injection
-    implementation("io.insert-koin:koin-core:3.1.3")
+    api("io.insert-koin:koin-core:3.1.3")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
     testImplementation("org.assertj:assertj-core:3.22.0")
+
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
@@ -53,6 +55,18 @@ tasks.test {
     jvmArgs = listOf(
         "--add-opens", "jdk.jdi/com.sun.tools.jdi=ALL-UNNAMED"
     )
+
+    // Compile the dummy plugin, since we load it during testing to test out the plugin feature
+    dependsOn(gradle.includedBuild("DummyPlugin").task(":jar"))
+    // put it on the class path, so that we can load it during testing
+    classpath = project.sourceSets.test.get().runtimeClasspath +
+                    files(
+                        Paths.get(
+                            gradle.includedBuild("DummyPlugin").projectDir.path,
+                            "build/libs",
+                            "DummyPlugin-1.0-SNAPSHOT.jar"
+                        )
+                    )
 
     // Parallelize tests
     maxParallelForks = Runtime.getRuntime().availableProcessors().div(2)
