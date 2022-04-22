@@ -4,21 +4,25 @@ import de.ahbnr.semanticweb.jdi2owl.BasicLogger
 import de.ahbnr.semanticweb.jdi2owl.Logger
 import de.ahbnr.semanticweb.jdi2owl.debugging.JvmDebugger
 import de.ahbnr.semanticweb.jdi2owl.linting.LinterMode
-import de.ahbnr.semanticweb.jdi2owl.mapping.*
+import de.ahbnr.semanticweb.jdi2owl.mapping.MappingLimiter
+import de.ahbnr.semanticweb.jdi2owl.mapping.MappingSettings
+import de.ahbnr.semanticweb.jdi2owl.mapping.OntIRIs
 import de.ahbnr.semanticweb.jdi2owl.mapping.datatypes.JavaAccessModifierDatatype
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.*
-import spoon.Launcher
-import java.nio.file.Path
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.BaseMapping
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.BuildParameters
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.GraphGenerator
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.MappingWithPlugins
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfoProvider
-
+import de.ahbnr.semanticweb.jdi2owl.mapping.genDefaultNs
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
-import spoon.reflect.CtModel
+import java.nio.file.Path
 
-class SimpleJDI2OWLApp: AutoCloseable {
+class SimpleJDI2OWLApp(
+    private val dynamicallyLoadPlugins: Boolean = false
+): AutoCloseable {
     private val logger = BasicLogger()
-    private val sourceModel: CtModel
     private val limiter: MappingLimiter
 
     var linterMode: LinterMode = LinterMode.NoLinters
@@ -41,10 +45,6 @@ class SimpleJDI2OWLApp: AutoCloseable {
         // Prepare settings for mapping
         val mappingSettings = MappingSettings()
         limiter = MappingLimiter(mappingSettings)
-
-        sourceModel = Launcher().apply {
-            buildModel()
-        }.model
     }
 
     override fun close() {
@@ -71,8 +71,15 @@ class SimpleJDI2OWLApp: AutoCloseable {
 
     fun inspectClass(className: String, classpaths: List<String>, line: Int): GraphGenerator.Result {
         return JvmDebugger().use { debugger ->
-            val mappers = IMapper.getAllMappers()
-            val graphGen = GraphGenerator( mappers )
+            val mappingMode =
+                if (dynamicallyLoadPlugins)
+                    MappingWithPlugins(
+                        emptyList(),
+                        true
+                    )
+                else
+                    BaseMapping
+            val graphGen = GraphGenerator( mappingMode )
 
             debugger.setBreakpoint(className, line) {true}
             debugger.launchVM(className, classpaths)
@@ -86,7 +93,6 @@ class SimpleJDI2OWLApp: AutoCloseable {
 
             val buildParameters = BuildParameters(
                 jvmState = jvmState,
-                sourceModel = sourceModel,
                 limiter = limiter,
                 typeInfoProvider = TypeInfoProvider(jvmState.pausedThread)
             )

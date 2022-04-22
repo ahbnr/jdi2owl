@@ -4,11 +4,11 @@ import de.ahbnr.semanticweb.jdi2owl.tests.utils.getTestSourceFile
 import de.ahbnr.semanticweb.jdi2owl.utils.SimpleJDI2OWLApp
 import org.apache.jena.rdf.model.Model
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
-import spoon.testing.utils.Check
 
 class RCNTests: TestBase() {
     companion object {
@@ -34,7 +34,7 @@ class RCNTests: TestBase() {
             line
         )
 
-        Check.assertNotNull(result.ontology)
+        assertNotNull(result.ontology)
 
         return result.ontology!!.asGraphModel()
     }

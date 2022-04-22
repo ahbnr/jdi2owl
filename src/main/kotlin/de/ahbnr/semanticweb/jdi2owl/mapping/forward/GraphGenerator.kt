@@ -4,12 +4,12 @@ package de.ahbnr.semanticweb.jdi2owl.mapping.forward
 
 import com.github.owlcs.ontapi.OntManagers
 import com.github.owlcs.ontapi.Ontology
+import de.ahbnr.semanticweb.jdi2owl.Logger
 import de.ahbnr.semanticweb.jdi2owl.linting.LinterMode
 import de.ahbnr.semanticweb.jdi2owl.linting.ModelSanityChecker
+import de.ahbnr.semanticweb.jdi2owl.mapping.OntIRIs
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.macros.Chain
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.UniversalKnowledgeBaseParser
-import de.ahbnr.semanticweb.jdi2owl.Logger
-import de.ahbnr.semanticweb.jdi2owl.mapping.OntIRIs
 import org.apache.jena.rdf.model.Model
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -23,8 +23,10 @@ import java.nio.file.Path
 class ParserException: Exception()
 
 class GraphGenerator(
-    private val mappers: List<IMapper>
+    mappingMode: MappingMode
 ) : KoinComponent {
+    private val mappers = mappingMode.getMappers()
+
     private val logger: Logger by inject()
     private val IRIs: OntIRIs by inject()
 

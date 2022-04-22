@@ -22,9 +22,6 @@ dependencies {
     // Apache Jena
     api("org.apache.jena:apache-jena-libs:4.2.0")
 
-    // Spoon for Java source code analysis
-    implementation("fr.inria.gforge.spoon:spoon-core:10.0.1-beta-1")
-
     // OWL-API 5 to support importing ontologies and parsing non-rdf knowledge bases, as well as for linting
     implementation("net.sourceforge.owlapi:owlapi-api:5.1.19")
 

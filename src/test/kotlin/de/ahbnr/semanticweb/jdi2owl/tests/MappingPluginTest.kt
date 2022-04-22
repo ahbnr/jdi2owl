@@ -1,13 +1,9 @@
 package de.ahbnr.semanticweb.jdi2owl.tests
 
-import com.github.owlcs.ontapi.Ontology
 import de.ahbnr.semanticweb.jdi2owl.tests.utils.getTestSourceFile
 import de.ahbnr.semanticweb.jdi2owl.utils.SimpleJDI2OWLApp
-import de.ahbnr.semanticweb.jdi2owl.utils.Statistics
 import org.apache.jena.rdf.model.Model
-import org.assertj.core.api.AbstractIntegerAssert
-import org.assertj.core.api.AbstractLongAssert
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -23,7 +19,7 @@ class MappingPluginTest: TestBase() {
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
-            jdi2owl = SimpleJDI2OWLApp()
+            jdi2owl = SimpleJDI2OWLApp(dynamicallyLoadPlugins = true)
 
             val result = jdi2owl.inspectClass(
                 "HelloWorld",

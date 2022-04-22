@@ -5,10 +5,10 @@ import de.ahbnr.semanticweb.jdi2owl.mapping.forward.GraphGenerator
 import de.ahbnr.semanticweb.jdi2owl.tests.utils.getTestSourceFile
 import de.ahbnr.semanticweb.jdi2owl.utils.SimpleJDI2OWLApp
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import spoon.testing.utils.Check
 
 /**
  * Tests that should confirm that there are no linting errors in a standard mapping
@@ -31,7 +31,7 @@ class LintingTest: TestBase() {
                 4
             )
 
-            Check.assertNotNull(result.ontology)
+            assertNotNull(result.ontology)
         }
 
         @JvmStatic
