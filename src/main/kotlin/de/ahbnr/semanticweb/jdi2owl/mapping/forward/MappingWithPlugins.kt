@@ -15,7 +15,11 @@ class MappingWithPlugins(
      * See the mapper plugin in plugins/DummyPlugin and the MappingPluginTest for an example of a
      * dynamically loaded mapper extension.
      */
-    private val dynamicallyLoadPlugins: Boolean = false
+    private val dynamicallyLoadPlugins: Boolean = false,
+    /**
+     * if true, run the plugin mappers only
+     */
+    private val disableBaseMapping: Boolean = false
 ): MappingMode() {
     override fun getMappers(): List<Mapper> {
         val allPlugins = plugins.toMutableList()
@@ -23,9 +27,11 @@ class MappingWithPlugins(
             allPlugins.addAll(ServiceLoader.load(MappingPlugin::class.java))
 
         val listeners = allPlugins.flatMap { it.getListeners() }
-        val baseMappers = getBaseMappers(listeners)
         val pluginMappers = allPlugins.flatMap { it.getMappers() }
 
-        return baseMappers + pluginMappers
+        return if (disableBaseMapping)
+            pluginMappers
+        else
+            getBaseMappers(listeners) + pluginMappers
     }
 }
