@@ -2,6 +2,7 @@ package de.ahbnr.semanticweb.jdi2owl.mapping
 
 class MappingSettings {
     var closeReferenceTypes: Boolean = true
+    var makeObjectsDistinct: Boolean = true
 
     val additionalExcludedPackages: MutableSet<String> = mutableSetOf()
     val additionalShallowPackages: MutableSet<String> = mutableSetOf()

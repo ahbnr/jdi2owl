@@ -15,6 +15,15 @@ class TripleCollectorDSL(private val tripleCollector: TripleCollector) {
         infix fun String.of(objectNode: Node) {
             tripleCollector.addStatement(subjectIRI, this, objectNode)
         }
+
+        infix fun String.of(iris: List<String>) {
+            tripleCollector.addStatement(
+                subjectIRI, this,
+                tripleCollector.addConstruct(
+                    TripleCollector.BlankNodeConstruct.RDFList.fromIRIs(iris)
+                )
+            )
+        }
     }
 
     infix fun String.`⊔`(rhs: Node) =

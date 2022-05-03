@@ -1,7 +1,6 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.base_mappers.component_maps.objects
 
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.base_mappers.component_maps.program_structure.withRefTypeContext
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TripleCollector
 
 fun mapTypeInstanceClosure(context: ObjectMappingContext) = with(context) {
     // Should we close all Java reference type?
@@ -20,13 +19,13 @@ fun mapTypeInstanceClosure(context: ObjectMappingContext) = with(context) {
 
                 // If there are instances, we declare the type equivalent to a nominal containing all its instances
                 if (instanceIRIs.isNotEmpty()) {
-                    tripleCollector.addStatement(
-                        typeIRI,
-                        IRIs.owl.equivalentClass,
-                        tripleCollector.addConstruct(
-                            TripleCollector.BlankNodeConstruct.OWLOneOf.fromIRIs(instanceIRIs)
-                        )
-                    )
+                    with (IRIs) {
+                        tripleCollector.dsl {
+                            typeIRI {
+                                owl.oneOf of instanceIRIs
+                            }
+                        }
+                    }
                 }
 
                 else {
