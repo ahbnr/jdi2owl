@@ -14,10 +14,19 @@ open class TestBase: KoinComponent {
     protected val IRIs: OntIRIs by inject()
 
     protected fun dumpRDFGraph(rdfGraph: Model, filePath: String) {
-        RDFWriter.create(rdfGraph)
-            .lang(Lang.TURTLE)
-            .format(RDFFormat.TURTLE_PRETTY)
-            .output(File(filePath).outputStream())
+        try {
+            RDFWriter.create(rdfGraph)
+                .lang(Lang.TURTLE)
+                .format(RDFFormat.TURTLE_PRETTY)
+                .output(File(filePath).outputStream())
+        }
+
+        catch (e: StackOverflowError) {
+            RDFWriter.create(rdfGraph)
+                .lang(Lang.TURTLE)
+                .format(RDFFormat.TURTLE_FLAT)
+                .output(File(filePath).outputStream())
+        }
     }
 
     protected fun assertContainsProgResource(rdfGraph: Model, resourceName: String) {

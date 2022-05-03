@@ -1,6 +1,7 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping.forward.base_mappers.component_maps.objects
 
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.base_mappers.component_maps.program_structure.withRefTypeContext
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 
 fun mapTypeInstanceClosure(context: ObjectMappingContext) = with(context) {
     // Should we close all Java reference type?
@@ -12,10 +13,11 @@ fun mapTypeInstanceClosure(context: ObjectMappingContext) = with(context) {
             withRefTypeContext(
                 typeInfo, typeIRI
             ) {
-                // val instances = referenceType.instances(Long.MAX_VALUE)
-                val instanceIRIs = allObjects
-                    .filter { it.referenceType() == referenceType }
+                val instanceIRIs = (sequenceOf(typeInfo) + typeInfo.getAllSubtypes())
+                    .filterIsInstance<TypeInfo.ReferenceTypeInfo.CreatedType>()
+                    .flatMap { it.jdiType.instances(Long.MAX_VALUE) }
                     .map { IRIs.run.genObjectIRI(it) }
+                    .toList()
 
                 // If there are instances, we declare the type equivalent to a nominal containing all its instances
                 if (instanceIRIs.isNotEmpty()) {

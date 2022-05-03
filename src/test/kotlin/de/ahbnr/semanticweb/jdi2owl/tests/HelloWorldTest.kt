@@ -7,7 +7,7 @@ import de.ahbnr.semanticweb.jdi2owl.utils.Statistics
 import org.apache.jena.rdf.model.Model
 import org.assertj.core.api.AbstractIntegerAssert
 import org.assertj.core.api.AbstractLongAssert
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -68,13 +68,13 @@ class HelloWorldTest: TestBase() {
         // If these numbers change a lot, either there was a big intentional change in the mapping algorithm,
         // or its a bug
         with (Statistics(ontology)) {
-            assertThat(numTriples).isBetween(300_000, 330_000)
+            assertThat(numTriples).isBetween(430_000, 450_000)
             assertThat(numAxioms).isBetween(200_000, 220_000)
             assertThat(numNamedIndividuals).isBetween(28_000, 30_000)
             assertThat(numObjectProperties).isBetween(8_000, 9_000)
             assertThat(numDataProperties).isBetween(5_500, 5_900)
-            assertThat(numSubClassOfAxioms).isBetween(1_350, 1_500)
-            assertThat(numEquivalentClassesAxioms).isBetween(130, 150)
+            assertThat(numSubClassOfAxioms).isBetween(1_200, 1_400)
+            assertThat(numEquivalentClassesAxioms).isBetween(1, 1)
             assertThat(numDisjointClassesAxioms).isBetween(1, 5)
             assertThat(numClassAssertions).isBetween(48_000, 50_000)
             assertThat(numJavaClasses).isBetween(300, 350)

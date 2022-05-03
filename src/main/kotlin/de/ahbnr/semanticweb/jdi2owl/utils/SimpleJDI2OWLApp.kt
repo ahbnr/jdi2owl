@@ -23,8 +23,8 @@ class SimpleJDI2OWLApp(
     private val dynamicallyLoadPlugins: Boolean = false
 ): AutoCloseable {
     private val logger = BasicLogger()
-    private val limiter: MappingLimiter
 
+    var limiter: MappingLimiter
     var linterMode: LinterMode = LinterMode.NoLinters
 
     init {

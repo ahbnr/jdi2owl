@@ -9,7 +9,7 @@ class TypeInfoProvider(mainThread: ThreadReference) {
         ?.getSystemClassLoader()
         ?.uniqueID()
 
-    private val vm = mainThread.virtualMachine()
+    val vm = mainThread.virtualMachine()
 
     // FIXME: This is not unique, considering class loaders
     val java_lang_Object: TypeInfo.ReferenceTypeInfo.CreatedType.ClassOrInterface.Class

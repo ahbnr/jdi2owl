@@ -1,8 +1,8 @@
 package de.ahbnr.semanticweb.jdi2owl.linting
 
 import com.github.owlcs.ontapi.Ontology
-import de.ahbnr.semanticweb.jdi2owl.mapping.MappingLimiter
 import de.ahbnr.semanticweb.jdi2owl.Logger
+import de.ahbnr.semanticweb.jdi2owl.mapping.MappingLimiter
 import de.ahbnr.semanticweb.jdi2owl.mapping.OntIRIs
 import openllet.core.vocabulary.BuiltinNamespace
 import openllet.jena.BuiltinTerm
@@ -82,18 +82,27 @@ class ModelSanityChecker : KoinComponent {
                 IRIs.ns.owl,
             )
         )
-        val lints = checker.validate()
-        if (!lints.isEmpty()) {
-            if (lints.onlyUntypedJavaObjects && limiter.isLimiting() && !fullLintingReport) {
-                logger.debug("Untyped java objects found by Openllint. This is likely caused by the shallow analysis and usually no reason for concern.")
-            } else {
-                lints.log()
-            }
 
-            logger.log("")
+        val lints = try {
+            checker.validate()
+        } catch (e: StackOverflowError) {
+            logger.warning("Encountered stack overflow in OWL syntax check linter. This can for example happen if there are too long RDF lists. We are skipping this linter.")
+            return true
         }
 
-        return lints.isEmpty()
+        return if (!lints.isEmpty()) {
+            if (lints.onlyUntypedJavaObjects && limiter.isLimiting() && !fullLintingReport) {
+                logger.debug("Untyped java objects found by Openllint. This is likely caused by the shallow analysis and usually no reason for concern.")
+                logger.log("")
+
+                true
+            } else {
+                lints.log()
+                logger.log("")
+
+                false
+            }
+        } else true
     }
 
     // based on https://github.com/Galigator/openllet/blob/b7a07b60d2ae6a147415e30be0ffb72eff7fe857/tools-cli/src/main/java/openllet/Openllint.java#L315

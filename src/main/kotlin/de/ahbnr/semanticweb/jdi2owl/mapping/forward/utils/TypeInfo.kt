@@ -19,6 +19,9 @@ sealed class TypeInfo(
         abstract val binaryName: String
 
         abstract fun getDirectSupertypes(): Sequence<ReferenceTypeInfo>
+        abstract fun getDirectSubtypes(): Sequence<ReferenceTypeInfo>
+
+        abstract fun getAllSubtypes(): Sequence<ReferenceTypeInfo>
 
         sealed class CreatedType(
             typeInfoProvider: TypeInfoProvider,
@@ -30,6 +33,12 @@ sealed class TypeInfo(
 
             override val binaryName: String
                 get() = jdiType.name()
+
+            override fun getAllSubtypes(): Sequence<ReferenceTypeInfo> {
+                val directSubtypes = getDirectSubtypes()
+
+                return directSubtypes + directSubtypes.flatMap { it.getAllSubtypes() }
+            }
 
             sealed class ClassOrInterface: CreatedType {
                 override val jdiType: ReferenceType
@@ -70,6 +79,11 @@ sealed class TypeInfo(
                             .map {
                                 typeInfoProvider.getTypeInfo(it)
                             }
+
+                    override fun getDirectSubtypes(): Sequence<CreatedType> =
+                        jdiType.subclasses().asSequence().map {
+                            typeInfoProvider.getTypeInfo(it)
+                        }
                 }
 
                 class Interface(
@@ -97,6 +111,11 @@ sealed class TypeInfo(
                                 typeInfoProvider.getTypeInfo(it)
                             }
                     }
+
+                    override fun getDirectSubtypes(): Sequence<CreatedType> =
+                        (jdiType.subinterfaces().asSequence() + jdiType.implementors().asSequence()).map {
+                            typeInfoProvider.getTypeInfo(it)
+                        }
                 }
             }
 
@@ -149,6 +168,22 @@ sealed class TypeInfo(
                         else arraySupertypes
                     }
                 }
+
+                override fun getDirectSubtypes(): Sequence<ReferenceTypeInfo> =
+                    when(componentType) {
+                        is VoidTypeInfo -> throw RuntimeException("There can be no array type with void component type. This should never happen.")
+                        is PrimitiveTypeInfo -> emptySequence()
+                        is ReferenceTypeInfo ->
+                            componentType
+                                .getDirectSubtypes()
+                                .map {
+                                    val arrayTypeName = "${it.binaryName}[]"
+
+                                    typeInfoProvider
+                                        .getPreparedTypeInfoByName(arrayTypeName)
+                                        ?: typeInfoProvider.getNotYetLoadedTypeInfo(arrayTypeName)
+                                }
+                    }
             }
         }
 
@@ -158,8 +193,10 @@ sealed class TypeInfo(
         ): ReferenceTypeInfo(typeInfoProvider) {
             override val rcn: String = "NotYetLoaded-$binaryName"
 
-            // Direct supetypes are unknown for not-yet loaded types
+            // Direct super-/subtypes are unknown for not-yet loaded types
             override fun getDirectSupertypes(): Sequence<ReferenceTypeInfo> = emptySequence()
+            override fun getDirectSubtypes(): Sequence<ReferenceTypeInfo> = emptySequence()
+            override fun getAllSubtypes(): Sequence<ReferenceTypeInfo> = emptySequence()
         }
     }
 }

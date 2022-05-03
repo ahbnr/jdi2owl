@@ -127,8 +127,6 @@ class RCNTests: TestBase() {
     fun `RCNs of variables are correct`() {
         val rdfGraph = inspectClass("Variables", 21)
 
-        dumpRDFGraph(rdfGraph, "datatest.ttl")
-
         assertContainsProgResource(rdfGraph, "SysLoader-RCNTests.Variables.-void-someMethod%28%29.myVar")
         assertContainsResource(
             rdfGraph,

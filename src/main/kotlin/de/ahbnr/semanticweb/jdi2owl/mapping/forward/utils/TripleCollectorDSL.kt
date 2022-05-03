@@ -38,12 +38,14 @@ class TripleCollectorDSL(private val tripleCollector: TripleCollector) {
             )
         )
 
-    fun oneOf(vararg iris: String) =
+    fun oneOf(iris: List<String>) =
         tripleCollector.addConstruct(
             TripleCollector.BlankNodeConstruct.OWLOneOf.fromIRIs(
-                listOf( *iris )
+                iris
             )
         )
+
+    fun oneOf(vararg iris: String) = oneOf(listOf(*iris))
 
     operator fun String.invoke(block: SubjectContext.() -> Unit) {
         SubjectContext(tripleCollector, this).block()
