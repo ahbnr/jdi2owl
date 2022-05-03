@@ -45,6 +45,17 @@ fun mapObjects(context: MappingContext) = with(context) {
 
         mapStaticClassMembers(this)
     }
+
+    if (buildParameters.limiter.settings.makeObjectsDistinct) {
+        with (IRIs) {
+            tripleCollector.dsl {
+                run.distinctObjectsAxiom {
+                    rdf.type of owl.AllDifferent
+                    owl.members of allObjects.map { run.genObjectIRI(it) }
+                }
+            }
+        }
+    }
 }
 
 interface ObjectMappingContext: MappingContext {

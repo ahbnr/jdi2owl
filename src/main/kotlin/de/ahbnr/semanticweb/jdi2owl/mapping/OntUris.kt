@@ -1,11 +1,7 @@
 package de.ahbnr.semanticweb.jdi2owl.mapping
 
 import com.sun.jdi.*
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.FieldInfo
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.LocalVariableInfo
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.LocationInfo
-import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.MethodInfo
+import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.*
 import org.apache.jena.atlas.lib.IRILib
 import org.apache.jena.datatypes.xsd.XSDDatatype
 
@@ -58,6 +54,9 @@ class OntIRIs(val ns: Namespaces) {
         val maxQualifiedCardinality = ns.owl + "maxQualifiedCardinality"
 
         val sameAs = ns.owl + "sameAs"
+
+        val AllDifferent = ns.owl + "AllDifferent"
+        val members = ns.owl + "members"
     }
 
     val owl = OwlIRIs()
@@ -182,6 +181,8 @@ class OntIRIs(val ns: Namespaces) {
         }
 
     inner class RunIRIs {
+        val distinctObjectsAxiom = ns.run + "distinctObjectsAxiom"
+
         fun genFrameIRI(frameDepth: Int): String =
             "${ns.run}frame$frameDepth"
 
