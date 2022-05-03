@@ -68,7 +68,7 @@ class HelloWorldTest: TestBase() {
         // If these numbers change a lot, either there was a big intentional change in the mapping algorithm,
         // or its a bug
         with (Statistics(ontology)) {
-            assertThat(numTriples).isBetween(430_000, 450_000)
+            assertThat(numTriples).isBetween(320_000, 350_000)
             assertThat(numAxioms).isBetween(200_000, 220_000)
             assertThat(numNamedIndividuals).isBetween(28_000, 30_000)
             assertThat(numObjectProperties).isBetween(8_000, 9_000)

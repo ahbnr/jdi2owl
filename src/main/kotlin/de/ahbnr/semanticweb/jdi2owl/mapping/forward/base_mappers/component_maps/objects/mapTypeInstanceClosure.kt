@@ -13,9 +13,13 @@ fun mapTypeInstanceClosure(context: ObjectMappingContext) = with(context) {
             withRefTypeContext(
                 typeInfo, typeIRI
             ) {
-                val instanceIRIs = (sequenceOf(typeInfo) + typeInfo.getAllSubtypes())
+                val subtypes = (sequenceOf(typeInfo) + typeInfo.getAllSubtypes())
                     .filterIsInstance<TypeInfo.ReferenceTypeInfo.CreatedType>()
-                    .flatMap { it.jdiType.instances(Long.MAX_VALUE) }
+                    .map { it.jdiType }
+                    .toSet()
+
+                val instanceIRIs = allObjects
+                    .filter { subtypes.contains(it.referenceType()) }
                     .map { IRIs.run.genObjectIRI(it) }
                     .toList()
 
