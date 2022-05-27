@@ -153,8 +153,11 @@ sealed class TypeInfo(
                             .map {
                                 val arrayTypeName = "${it.binaryName}[]"
 
+                                val classLoader: ClassLoaderReference? =
+                                    (it as? CreatedType)?.jdiType?.classLoader()
+
                                 typeInfoProvider
-                                    .getPreparedTypeInfoByName(arrayTypeName)
+                                    .getPreparedTypeInfoByName(arrayTypeName, classLoader)
                                     ?: typeInfoProvider.getNotYetLoadedTypeInfo(arrayTypeName)
                             }
 
@@ -179,8 +182,11 @@ sealed class TypeInfo(
                                 .map {
                                     val arrayTypeName = "${it.binaryName}[]"
 
+                                    val classLoader: ClassLoaderReference? =
+                                        (it as? CreatedType)?.jdiType?.classLoader()
+
                                     typeInfoProvider
-                                        .getPreparedTypeInfoByName(arrayTypeName)
+                                        .getPreparedTypeInfoByName(arrayTypeName, classLoader)
                                         ?: typeInfoProvider.getNotYetLoadedTypeInfo(arrayTypeName)
                                 }
                     }

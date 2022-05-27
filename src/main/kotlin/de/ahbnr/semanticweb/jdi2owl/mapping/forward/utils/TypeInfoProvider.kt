@@ -11,7 +11,6 @@ class TypeInfoProvider(mainThread: ThreadReference) {
 
     val vm = mainThread.virtualMachine()
 
-    // FIXME: This is not unique, considering class loaders
     val java_lang_Object: TypeInfo.ReferenceTypeInfo.CreatedType.ClassOrInterface.Class
     val `java_lang_Object%5B%5D`: TypeInfo.ReferenceTypeInfo
     val java_lang_Cloneable: TypeInfo.ReferenceTypeInfo
@@ -19,10 +18,10 @@ class TypeInfoProvider(mainThread: ThreadReference) {
 
     init {
         fun getReferenceTypeInfo(binaryName: String) =
-            getPreparedTypeInfoByName(binaryName)
+            getPreparedTypeInfoByName(binaryName, null)
                 ?: getNotYetLoadedTypeInfo(binaryName)
 
-        java_lang_Object = getPreparedTypeInfoByName("java.lang.Object")
+        java_lang_Object = getPreparedTypeInfoByName("java.lang.Object", null)
                 as? TypeInfo.ReferenceTypeInfo.CreatedType.ClassOrInterface.Class
             ?: throw RuntimeException("java.lang.Object must always be loaded. We do not support early VM states where it is not. This should never happen.")
         `java_lang_Object%5B%5D` = getReferenceTypeInfo("java.lang.Object[]")
@@ -34,13 +33,13 @@ class TypeInfoProvider(mainThread: ThreadReference) {
      * Returns ReferenceTypeInfo instance for the type with the given name,
      * if the type has at least been prepared, in the case of a non-array type,
      * or if the type has at least been created, in the case of array types.
-     *
-     * FIXME: This is actually not unique, considering class loaders
      */
-    fun getPreparedTypeInfoByName(binaryName: String): TypeInfo.ReferenceTypeInfo.CreatedType? =
+    fun getPreparedTypeInfoByName(binaryName: String, classLoader: ClassLoaderReference?): TypeInfo.ReferenceTypeInfo.CreatedType? =
         vm
             .classesByName(binaryName)
-            .firstOrNull()
+            .firstOrNull {
+                it.classLoader() == classLoader
+            }
             ?.let {
                 getTypeInfo(it)
             }
