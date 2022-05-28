@@ -85,6 +85,6 @@ class TypeInfoProvider(mainThread: ThreadReference) {
     fun getTypeInfo(type: ReferenceType): TypeInfo.ReferenceTypeInfo.CreatedType =
         getTypeInfo(type as Type) as TypeInfo.ReferenceTypeInfo.CreatedType
 
-    fun getNotYetLoadedTypeInfo(typeName: String): TypeInfo.ReferenceTypeInfo.NotYetLoadedType =
-        TypeInfo.ReferenceTypeInfo.NotYetLoadedType(this, typeName)
+    fun getNotYetLoadedTypeInfo(typeName: String): TypeInfo.ReferenceTypeInfo.UnpreparedType =
+        TypeInfo.ReferenceTypeInfo.UnpreparedType(this, typeName)
 }

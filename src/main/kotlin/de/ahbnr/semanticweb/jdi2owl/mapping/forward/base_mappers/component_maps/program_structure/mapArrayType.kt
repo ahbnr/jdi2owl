@@ -23,11 +23,11 @@ fun mapArrayType(context: ArrayTypeContext): Unit = with(context) {
                 )
             }
 
-            if (componentType is TypeInfo.ReferenceTypeInfo.NotYetLoadedType) {
+            if (componentType is TypeInfo.ReferenceTypeInfo.UnpreparedType) {
                 val componentTypeInfo = buildParameters.typeInfoProvider.getNotYetLoadedTypeInfo(componentType.binaryName)
                 val componentTypeIRI = IRIs.prog.genReferenceTypeIRI(componentTypeInfo)
-                withNotYetLoadedTypeContext(componentTypeInfo, componentTypeIRI) {
-                    mapNotYetLoadedType(this)
+                withUnpreparedTypeContext(componentTypeInfo, componentTypeIRI) {
+                    mapUnpreparedType(this)
                 }
 
                 tripleCollector.addStatement(

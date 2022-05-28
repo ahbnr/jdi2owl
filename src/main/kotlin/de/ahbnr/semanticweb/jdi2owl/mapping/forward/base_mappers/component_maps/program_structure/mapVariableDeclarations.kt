@@ -74,9 +74,9 @@ fun mapVariableDeclaration(context: VariableDeclarationContext) = with(context) 
                 }
             }
 
-            if (variableTypeInfo is TypeInfo.ReferenceTypeInfo.NotYetLoadedType) {
-                withNotYetLoadedTypeContext(variableTypeInfo, variableTypeIRI) {
-                    mapNotYetLoadedType(this)
+            if (variableTypeInfo is TypeInfo.ReferenceTypeInfo.UnpreparedType) {
+                withUnpreparedTypeContext(variableTypeInfo, variableTypeIRI) {
+                    mapUnpreparedType(this)
                 }
             }
         }

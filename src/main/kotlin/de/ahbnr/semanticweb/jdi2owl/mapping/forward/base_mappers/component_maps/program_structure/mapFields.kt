@@ -87,12 +87,12 @@ fun mapField(context: FieldContext) = with(context) {
                 }
             }
 
-            if (fieldTypeInfo is TypeInfo.ReferenceTypeInfo.NotYetLoadedType) {
-                withNotYetLoadedTypeContext(
+            if (fieldTypeInfo is TypeInfo.ReferenceTypeInfo.UnpreparedType) {
+                withUnpreparedTypeContext(
                     fieldTypeInfo,
                     fieldTypeIRI
                 ) {
-                    mapNotYetLoadedType(this)
+                    mapUnpreparedType(this)
                 }
             }
         }

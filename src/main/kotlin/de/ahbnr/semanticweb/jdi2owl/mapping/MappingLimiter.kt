@@ -25,7 +25,7 @@ class MappingLimiter(
     fun canReferenceTypeBeSkipped(typeInfo: TypeInfo.ReferenceTypeInfo) =
         when (typeInfo) {
             is TypeInfo.ReferenceTypeInfo.CreatedType -> canReferenceTypeBeSkipped(typeInfo.jdiType)
-            is TypeInfo.ReferenceTypeInfo.NotYetLoadedType -> canReferenceTypeBeSkipped(typeInfo.binaryName)
+            is TypeInfo.ReferenceTypeInfo.UnpreparedType -> canReferenceTypeBeSkipped(typeInfo.binaryName)
         }
 
     fun canReferenceTypeBeSkipped(unloadedTypeName: String) =

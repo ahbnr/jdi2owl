@@ -49,9 +49,9 @@ fun mapReferenceType(context: CreatedTypeContext) = with(context) {
             directSupertypeIRI
         )
 
-        if (directSupertypeInfo is TypeInfo.ReferenceTypeInfo.NotYetLoadedType) {
-            withNotYetLoadedTypeContext(directSupertypeInfo, directSupertypeIRI) {
-                mapNotYetLoadedType(this)
+        if (directSupertypeInfo is TypeInfo.ReferenceTypeInfo.UnpreparedType) {
+            withUnpreparedTypeContext(directSupertypeInfo, directSupertypeIRI) {
+                mapUnpreparedType(this)
             }
         }
     }

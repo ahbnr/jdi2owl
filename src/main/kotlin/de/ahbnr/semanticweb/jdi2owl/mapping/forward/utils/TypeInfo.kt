@@ -193,7 +193,7 @@ sealed class TypeInfo(
             }
         }
 
-        class NotYetLoadedType(
+        class UnpreparedType(
             typeInfoProvider: TypeInfoProvider,
             override val binaryName: String
         ): ReferenceTypeInfo(typeInfoProvider) {

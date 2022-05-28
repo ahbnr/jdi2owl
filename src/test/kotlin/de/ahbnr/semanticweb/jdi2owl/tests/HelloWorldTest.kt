@@ -73,7 +73,7 @@ class HelloWorldTest: TestBase() {
             assertThat(numNamedIndividuals).isBetween(28_000, 30_000)
             assertThat(numObjectProperties).isBetween(8_000, 9_000)
             assertThat(numDataProperties).isBetween(5_500, 5_900)
-            assertThat(numSubClassOfAxioms).isBetween(1_200, 1_400)
+            assertThat(numSubClassOfAxioms).isBetween(1_400, 1_700)
             assertThat(numEquivalentClassesAxioms).isBetween(1, 1)
             assertThat(numDisjointClassesAxioms).isBetween(1, 5)
             assertThat(numClassAssertions).isBetween(48_000, 50_000)

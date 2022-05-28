@@ -5,12 +5,10 @@ import de.ahbnr.semanticweb.jdi2owl.mapping.forward.base_mappers.component_maps.
 import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 
 /**
- * Some classes might not have been loaded by the JVM yet and are only known by name until now.
+ * Some classes might not have been prepared by the JVM yet and are only known by name until now.
  * We reflect these incomplete types in the knowledge graph by typing them with java:UnloadedType
- *
- * See also https://docs.oracle.com/en/java/javase/11/docs/api/jdk.jdi/com/sun/jdi/ClassNotLoadedException.html
  */
-fun mapNotYetLoadedType(context: NotYetLoadedTypeContext): Unit = with(context) {
+fun mapUnpreparedType(context: UnpreparedTypeContext): Unit = with(context) {
     if (buildParameters.limiter.canReferenceTypeBeSkipped(typeInfo.binaryName))
         return
 
@@ -25,6 +23,8 @@ fun mapNotYetLoadedType(context: NotYetLoadedTypeContext): Unit = with(context) 
                 // and thus inherit from java.lang.Object
                 rdf.type of owl.Class
                 rdfs.subClassOf of prog.java_lang_Object
+                // however, they have no instances, so we also declare them as being subsumed by nothing.
+                rdfs.subClassOf of owl.Nothing
             }
         }
     }
@@ -32,17 +32,17 @@ fun mapNotYetLoadedType(context: NotYetLoadedTypeContext): Unit = with(context) 
     pluginListeners.mapInContext(context)
 }
 
-interface NotYetLoadedTypeContext: RefTypeContext {
-    override val typeInfo: TypeInfo.ReferenceTypeInfo.NotYetLoadedType
+interface UnpreparedTypeContext: RefTypeContext {
+    override val typeInfo: TypeInfo.ReferenceTypeInfo.UnpreparedType
     override val typeIRI: String
 }
 
-fun <R> MappingContext.withNotYetLoadedTypeContext(
-    typeInfo: TypeInfo.ReferenceTypeInfo.NotYetLoadedType,
+fun <R> MappingContext.withUnpreparedTypeContext(
+    typeInfo: TypeInfo.ReferenceTypeInfo.UnpreparedType,
     typeIRI: String,
-    block: NotYetLoadedTypeContext.() -> R
+    block: UnpreparedTypeContext.() -> R
 ): R =
-    object: MappingContext by this, NotYetLoadedTypeContext {
-        override val typeInfo: TypeInfo.ReferenceTypeInfo.NotYetLoadedType = typeInfo
+    object: MappingContext by this, UnpreparedTypeContext {
+        override val typeInfo: TypeInfo.ReferenceTypeInfo.UnpreparedType = typeInfo
         override val typeIRI: String = typeIRI
     }.let(block)
