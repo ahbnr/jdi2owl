@@ -6,7 +6,7 @@ import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 
 /**
  * Some classes might not have been prepared by the JVM yet and are only known by name until now.
- * We reflect these incomplete types in the knowledge graph by typing them with java:UnloadedType
+ * We reflect these incomplete types in the knowledge graph by typing them with java:UnpreparedType
  */
 fun mapUnpreparedType(context: UnpreparedTypeContext): Unit = with(context) {
     if (buildParameters.limiter.canReferenceTypeBeSkipped(typeInfo.binaryName))
@@ -16,7 +16,7 @@ fun mapUnpreparedType(context: UnpreparedTypeContext): Unit = with(context) {
         tripleCollector.dsl {
             typeIRI {
                 rdf.type of owl.NamedIndividual
-                rdf.type of java.UnloadedType
+                rdf.type of java.UnpreparedType
                 java.hasName of mapJavaNameToLiteral(typeInfo.binaryName)
 
                 // all unloaded types must be reference types

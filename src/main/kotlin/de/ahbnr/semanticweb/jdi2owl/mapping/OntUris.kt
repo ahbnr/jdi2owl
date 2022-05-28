@@ -71,7 +71,7 @@ class OntIRIs(val ns: Namespaces) {
     val sh = ShaclIRIs()
 
     inner class JavaIRIs {
-        val UnloadedType = ns.java + "UnloadedType"
+        val UnpreparedType = ns.java + "UnpreparedType"
         val Class = ns.java + "Class"
         val Method = ns.java + "Method"
         val Field = ns.java + "Field"
@@ -83,7 +83,7 @@ class OntIRIs(val ns: Namespaces) {
         val Array = ns.java + "Array"
         val SequenceElement = ns.java + "SequenceElement"
         val `SequenceElement%3CObject%3E` = ns.java + IRILib.encodeUriComponent("SequenceElement<Object>")
-        val UnloadedTypeArray = ns.java + "UnloadedTypeArray"
+        val UnpreparedTypeArray = ns.java + "UnpreparedTypeArray"
         val PrimitiveArray = ns.java + "PrimitiveArray"
         val PrimitiveSequenceElement = ns.java + "PrimitiveSequenceElement"
         val hasIndex = ns.java + "hasIndex"

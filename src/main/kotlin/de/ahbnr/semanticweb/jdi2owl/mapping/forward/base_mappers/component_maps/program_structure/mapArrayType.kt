@@ -33,7 +33,7 @@ fun mapArrayType(context: ArrayTypeContext): Unit = with(context) {
                 tripleCollector.addStatement(
                     typeIRI,
                     IRIs.rdfs.subClassOf,
-                    IRIs.java.UnloadedTypeArray
+                    IRIs.java.UnpreparedTypeArray
                 )
             }
         }
