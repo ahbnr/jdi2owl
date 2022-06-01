@@ -197,7 +197,7 @@ sealed class TypeInfo(
             typeInfoProvider: TypeInfoProvider,
             override val binaryName: String
         ): ReferenceTypeInfo(typeInfoProvider) {
-            override val rcn: String = "NotYetLoaded-$binaryName"
+            override val rcn: String = "Unprepared-$binaryName"
 
             // Direct super-/subtypes are unknown for not-yet loaded types
             override fun getDirectSupertypes(): Sequence<ReferenceTypeInfo> = emptySequence()

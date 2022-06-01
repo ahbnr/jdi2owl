@@ -46,6 +46,9 @@ fun mapObjects(context: MappingContext) = with(context) {
         mapStaticClassMembers(this)
     }
 
+    // This was an experiment:
+    // Adding an explicit AllDifferent axiom should not be necessary since the functional+inverse functional
+    // hasUniqueId role of objects is enough to infer objects to be different
     if (buildParameters.limiter.settings.makeObjectsDistinct) {
         with (IRIs) {
             tripleCollector.dsl {

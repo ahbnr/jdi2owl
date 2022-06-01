@@ -25,6 +25,14 @@ class HelloWorldTest: TestBase() {
         @BeforeAll
         fun beforeAll() {
             jdi2owl = SimpleJDI2OWLApp()
+                // Uncomment if you want to experiment with the mapping limiter
+                // .apply {
+                //     limiter.settings.apply {
+                //         limitSdk = true
+                //         closeReferenceTypes = false
+                //         makeObjectsDistinct = false
+                //     }
+                // }
 
             val result = jdi2owl.inspectClass(
                 "HelloWorld",
@@ -65,9 +73,15 @@ class HelloWorldTest: TestBase() {
         fun assertThat(metric: Statistics.Metric<Int>): AbstractIntegerAssert<*> = assertThat(metric.value)
         fun assertThat(metric: Statistics.Metric<Long>): AbstractLongAssert<*> = assertThat(metric.value)
 
+        val statistics = Statistics(ontology)
+
+        for ((_, metric) in statistics.allMetrics) {
+            println("${metric.name}: ${metric.value}")
+        }
+
         // If these numbers change a lot, either there was a big intentional change in the mapping algorithm,
         // or its a bug
-        with (Statistics(ontology)) {
+        with (statistics) {
             assertThat(numTriples).isBetween(320_000, 350_000)
             assertThat(numAxioms).isBetween(200_000, 220_000)
             assertThat(numNamedIndividuals).isBetween(28_000, 30_000)

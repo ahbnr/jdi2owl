@@ -80,7 +80,7 @@ class OntIRIs(val ns: Namespaces) {
 
         val Interface = ns.java + "Interface"
 
-        val Array = ns.java + "Array"
+        val ArrayType = ns.java + "ArrayType"
         val SequenceElement = ns.java + "SequenceElement"
         val `SequenceElement%3CObject%3E` = ns.java + IRILib.encodeUriComponent("SequenceElement<Object>")
         val UnpreparedTypeArray = ns.java + "UnpreparedTypeArray"

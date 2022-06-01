@@ -40,7 +40,7 @@ class Statistics(ontology: Ontology): KoinComponent {
 
                 "numJavaClasses" to Metric("Java Classes", countSubjects(java.Class)),
                 "numJavaInterfaces" to Metric("Java Interfaces", countSubjects(java.Interface)),
-                "numJavaArrayTypes" to Metric("Java Array Types", countSubjects(java.Array)),
+                "numJavaArrayTypes" to Metric("Java Array Types", countSubjects(java.ArrayType)),
                 "numJavaMethods" to Metric("Java Methods", countSubjects(java.Method)),
                 "numJavaFields" to Metric("Java Fields", countSubjects(java.Field)),
                 "numJavaVariableDeclarations" to Metric("Java Varianbles", countSubjects(java.VariableDeclaration)),

@@ -5,7 +5,7 @@ import de.ahbnr.semanticweb.jdi2owl.mapping.forward.utils.TypeInfo
 fun mapArrayType(context: ArrayTypeContext): Unit = with(context) {
     tripleCollector.addStatement(
         // this, as an individual, is an array:
-        typeIRI, IRIs.rdf.type, IRIs.java.Array
+        typeIRI, IRIs.rdf.type, IRIs.java.ArrayType
     )
 
     when (val componentType = typeInfo.componentType) {

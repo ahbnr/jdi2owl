@@ -108,7 +108,7 @@ class RCNTests: TestBase() {
         val rdfGraph = inspectClass("Methods", 18)
 
         assertContainsProgResource(rdfGraph, "SysLoader-RCNTests.Methods.-void-someMethod%28%29")
-        assertContainsProgResource(rdfGraph, "SysLoader-RCNTests.Methods.-NotYetLoaded-RCNTests.Methods%24NotLoaded-notLoadedTypesMethod%28NotYetLoaded-RCNTests.Methods%24NotLoaded%29")
+        assertContainsProgResource(rdfGraph, "SysLoader-RCNTests.Methods.-Unprepared-RCNTests.Methods%24NotLoaded-notLoadedTypesMethod%28Unprepared-RCNTests.Methods%24NotLoaded%29")
         assertContainsProgResource(rdfGraph, "SysLoader-RCNTests.Methods%24StaticMemberClass.-void-someMethod%28%29")
         assertContainsProgResource(rdfGraph, "SysLoader-RCNTests.Methods%24StaticMemberClass.-SysLoader-RCNTests.Methods%24StaticMemberClass-complexMethod%28SysLoader-RCNTests.Methods%24StaticMemberClass%2CSysLoader-RCNTests.Methods%24StaticMemberClass%29")
     }
