@@ -4,7 +4,7 @@
 This library is part of of the [Semantic Java Debugger](https://github.com/ahbnr/SemanticJavaDebugger) (`sjdb`) project.
 Please see the Semantic Java Debugger repository or [my thesis](https://tuprints.ulb.tu-darmstadt.de/22143/) for context.
 
-One of the core components implemented for `sjdb` is a mapping of Java program states to [OWL](https://www.w3.org/TR/2012/REC-owl2-overview-20121211/) knowledge bases, see chapters 4, 5, and 6 of my thesis.
+One of the core components of `sjdb` is a mapping of Java program states to [OWL](https://www.w3.org/TR/2012/REC-owl2-overview-20121211/) knowledge bases, see chapters 4, 5, and 6 of my thesis.
 As suggested by Kamburjan et al. [(link)](https://doi.org/10.1007/978-3-030-77385-4_8), semantic debugging is only one possible application of such a mapping.
 They also argue that such mappings of program states could be used for the verification of class invariants, or to implement internal semantic state access which allows programs to semantically query their own state.
 
@@ -36,10 +36,10 @@ You can build the library with gradle:
 There is no tutorial yet, but you can look at some usage examples.
 
 For some very basic examples, you can look at the tests in [`src/test/kotlin/de/ahbnr/semanticweb/jdi2owl/tests`](https://github.com/ahbnr/jdi2owl/tree/main/src/test/kotlin/de/ahbnr/semanticweb/jdi2owl/tests).
-E.g. [`HelloWorldTest.kt`](https://github.com/ahbnr/jdi2owl/blob/main/src/test/kotlin/de/ahbnr/semanticweb/jdi2owl/tests/HelloWorldTest.kt) shows how to map the state of basic "Hello World"-program, and some inspections performed on the resulting knowledge base.
+E.g. [`HelloWorldTest.kt`](https://github.com/ahbnr/jdi2owl/blob/main/src/test/kotlin/de/ahbnr/semanticweb/jdi2owl/tests/HelloWorldTest.kt) shows how to map the state of a basic "Hello World"-program, and demonstrates some simple inspections performed on the resulting knowledge base.
 
-The main usage example is the Semantic Java Debugger (sjdb).
-For instance, the code in [`src/main/kotlin/de/ahbnr/semanticweb/sjdb/repl/commands/BuildKBCommand.kt`](https://github.com/ahbnr/SemanticJavaDebugger/blob/main/src/main/kotlin/de/ahbnr/semanticweb/sjdb/repl/commands/BuildKBCommand.kt) in the `sjdb` project demonstrates how to construct a knowledge base from the state of a running Java program.
+The main usage example is the [Semantic Java Debugger](https://github.com/ahbnr/SemanticJavaDebugger) (sjdb).
+For instance, the code in [`src/main/kotlin/de/ahbnr/semanticweb/sjdb/repl/commands/BuildKBCommand.kt`](https://github.com/ahbnr/SemanticJavaDebugger/blob/main/src/main/kotlin/de/ahbnr/semanticweb/sjdb/repl/commands/BuildKBCommand.kt) in the `sjdb` project constructs a knowledge base from the state of a paused Java program.
 The other files in that directory also contain many examples on how that knowledge base can be queried.
 
 Furthermore, there are some examples on how to use the plugin system of `jdi2owl` for extending a mapping.
